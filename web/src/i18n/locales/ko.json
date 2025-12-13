@@ -1,0 +1,60 @@
+{
+    "common": {
+        "ok": "확인",
+        "cancel": "취소",
+        "save": "저장",
+        "back": "뒤로",
+        "next": "다음",
+        "loading": "로딩 중..."
+    },
+    "auth": {
+        "login_title": "로그인",
+        "signup_title": "회원가입",
+        "email": "이메일",
+        "password": "비밀번호",
+        "login_button": "로그인",
+        "signup_button": "가입하기",
+        "forgot_password": "비밀번호를 잊으셨나요?",
+        "or_continue_with": "또는",
+        "dont_have_account": "계정이 없으신가요?"
+    },
+    "profile": {
+        "title": "프로필",
+        "edit_profile": "프로필 수정",
+        "distance": "{{distance}}km 거리",
+        "verified": "인증됨"
+    },
+    "onboarding": {
+        "welcome": "InDate에 오신 것을 환영합니다",
+        "tagline": "AI로 완벽한 매칭을 찾아보세요"
+    },
+    "discover": {
+        "title": "탐색",
+        "no_more_profiles": "근처에 프로필이 없습니다"
+    },
+    "matching": {
+        "its_a_match": "매칭됐어요!",
+        "send_message": "메시지 보내기",
+        "keep_swiping": "계속 스와이프"
+    },
+    "chat": {
+        "title": "메시지",
+        "no_messages": "아직 메시지가 없습니다",
+        "type_message": "메시지 입력...",
+        "send": "보내기",
+        "translated_from": "{{language}}에서 번역됨",
+        "show_original": "원문 보기",
+        "show_translation": "번역 보기",
+        "typing": "입력 중..."
+    },
+    "settings": {
+        "title": "설정",
+        "account": "계정",
+        "language": "언어",
+        "change_language": "언어 변경",
+        "dark_mode": "다크 모드",
+        "notifications": "알림",
+        "privacy": "개인정보",
+        "logout": "로그아웃"
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "common": {
+        "ok": "OK",
+        "cancel": "Cancel",
+        "save": "Save",
+        "back": "Back",
+        "next": "Next",
+        "loading": "Loading..."
+    },
+    "auth": {
+        "login_title": "Log In",
+        "signup_title": "Create Account",
+        "email": "Email",
+        "password": "Password",
+        "login_button": "Log In",
+        "signup_button": "Sign Up",
+        "forgot_password": "Forgot Password?",
+        "or_continue_with": "Or continue with",
+        "dont_have_account": "Don't have an account?"
+    },
+    "profile": {
+        "title": "Profile",
+        "edit_profile": "Edit Profile",
+        "distance": "{{distance}} km away",
+        "verified": "Verified"
+    },
+    "onboarding": {
+        "welcome": "Welcome to InDate",
+        "tagline": "Find your perfect match with AI"
+    },
+    "discover": {
+        "title": "Discover",
+        "no_more_profiles": "No more profiles nearby"
+    },
+    "matching": {
+        "its_a_match": "It's a Match!",
+        "send_message": "Send Message",
+        "keep_swiping": "Keep Swiping"
+    },
+    "chat": {
+        "title": "Messages",
+        "no_messages": "No messages yet",
+        "type_message": "Type a message...",
+        "send": "Send",
+        "translated_from": "Translated from {{language}}",
+        "show_original": "Show Original",
+        "show_translation": "Show Translation",
+        "typing": "Typing..."
+    },
+    "settings": {
+        "title": "Settings",
+        "account": "Account",
+        "language": "Language",
+        "change_language": "Change Language",
+        "dark_mode": "Dark Mode",
+        "notifications": "Notifications",
+        "privacy": "Privacy",
+        "logout": "Log Out"
+    }
+}

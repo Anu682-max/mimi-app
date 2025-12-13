@@ -1,0 +1,60 @@
+{
+    "common": {
+        "ok": "OK",
+        "cancel": "キャンセル",
+        "save": "保存",
+        "back": "戻る",
+        "next": "次へ",
+        "loading": "読み込み中..."
+    },
+    "auth": {
+        "login_title": "ログイン",
+        "signup_title": "アカウント作成",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "login_button": "ログイン",
+        "signup_button": "登録する",
+        "forgot_password": "パスワードをお忘れですか？",
+        "or_continue_with": "または",
+        "dont_have_account": "アカウントをお持ちでないですか？"
+    },
+    "profile": {
+        "title": "プロフィール",
+        "edit_profile": "プロフィール編集",
+        "distance": "{{distance}}km先",
+        "verified": "認証済み"
+    },
+    "onboarding": {
+        "welcome": "InDateへようこそ",
+        "tagline": "AIで理想の相手を見つけよう"
+    },
+    "discover": {
+        "title": "さがす",
+        "no_more_profiles": "近くにプロフィールがありません"
+    },
+    "matching": {
+        "its_a_match": "マッチしました！",
+        "send_message": "メッセージを送る",
+        "keep_swiping": "スワイプを続ける"
+    },
+    "chat": {
+        "title": "メッセージ",
+        "no_messages": "メッセージはまだありません",
+        "type_message": "メッセージを入力...",
+        "send": "送信",
+        "translated_from": "{{language}}から翻訳",
+        "show_original": "原文を表示",
+        "show_translation": "翻訳を表示",
+        "typing": "入力中..."
+    },
+    "settings": {
+        "title": "設定",
+        "account": "アカウント",
+        "language": "言語",
+        "change_language": "言語を変更",
+        "dark_mode": "ダークモード",
+        "notifications": "通知",
+        "privacy": "プライバシー",
+        "logout": "ログアウト"
+    }
+}

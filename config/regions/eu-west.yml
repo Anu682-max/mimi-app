@@ -1,0 +1,34 @@
+# EU West Region Configuration
+name: eu-west
+displayName: "Europe (West)"
+
+# Supported locales for this region
+locales:
+  - en
+  - de
+  - fr
+  - es
+defaultLocale: en
+
+# Default timezone
+timezone: Europe/London
+
+# Feature flags
+features:
+  chatTranslationEnabled: true
+  aiMatchingEnabled: true
+  videoProfileEnabled: true
+  verificationRequired: false
+  verificationStrictMode: false
+
+# Region-specific rules (GDPR considerations)
+rules:
+  minimumAge: 18
+  maxDistance: 300  # km
+  defaultSearchRadius: 30  # km
+
+# Endpoints (override in production)
+endpoints:
+  database: "${MONGODB_URI_EU_WEST}"
+  cache: "${REDIS_URL_EU_WEST}"
+  media: "s3://indate-media-eu-west"

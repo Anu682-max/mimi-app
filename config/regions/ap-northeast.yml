@@ -1,0 +1,33 @@
+# AP Northeast Region Configuration (Japan/Korea)
+name: ap-northeast
+displayName: "Asia Pacific (Northeast)"
+
+# Supported locales for this region
+locales:
+  - ja
+  - ko
+  - en
+defaultLocale: ja
+
+# Default timezone
+timezone: Asia/Tokyo
+
+# Feature flags
+features:
+  chatTranslationEnabled: true
+  aiMatchingEnabled: true
+  videoProfileEnabled: true
+  verificationRequired: true  # Stricter in this region
+  verificationStrictMode: true
+
+# Region-specific rules
+rules:
+  minimumAge: 18
+  maxDistance: 200  # km (smaller area focus)
+  defaultSearchRadius: 20  # km
+
+# Endpoints (override in production)
+endpoints:
+  database: "${MONGODB_URI_AP_NORTHEAST}"
+  cache: "${REDIS_URL_AP_NORTHEAST}"
+  media: "s3://indate-media-ap-northeast"

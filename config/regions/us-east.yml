@@ -1,0 +1,32 @@
+# US East Region Configuration
+name: us-east
+displayName: "United States (East)"
+
+# Supported locales for this region
+locales:
+  - en
+  - es
+defaultLocale: en
+
+# Default timezone
+timezone: America/New_York
+
+# Feature flags
+features:
+  chatTranslationEnabled: true
+  aiMatchingEnabled: true
+  videoProfileEnabled: true
+  verificationRequired: false
+  verificationStrictMode: false
+
+# Region-specific rules
+rules:
+  minimumAge: 18
+  maxDistance: 500  # km
+  defaultSearchRadius: 50  # km
+
+# Endpoints (override in production)
+endpoints:
+  database: "${MONGODB_URI_US_EAST}"
+  cache: "${REDIS_URL_US_EAST}"
+  media: "s3://indate-media-us-east"

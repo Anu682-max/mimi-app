@@ -1,0 +1,39 @@
+# InDate Development
+
+## Project Structure
+node_modules/
+dist/
+.env
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+## Logs
+logs/
+*.log
+npm-debug.log*
+
+## Build artifacts
+build/
+*.tsbuildinfo
+
+## React Native
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/app/build/
+*.keystore
+!debug.keystore
+
+## Test coverage
+coverage/
+
+## Temporary files
+tmp/
+temp/

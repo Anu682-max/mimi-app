@@ -1,18 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LOCALE_DISPLAY_NAMES, SUPPORTED_LOCALES, type Locale } from '@/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   const changeLanguage = (locale: Locale) => {
     i18n.changeLanguage(locale);
     setShowLanguageModal(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -40,13 +59,13 @@ export default function Home() {
           <div className="space-y-4">
             <Link
               href="/login"
-              className="block w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-bold text-lg hover:opacity-90 transition"
+              className="block w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-bold text-lg hover:opacity-90 transition text-center"
             >
               {t('auth.login_button')}
             </Link>
             <Link
               href="/signup"
-              className="block w-full py-4 border-2 border-pink-500 rounded-xl font-bold text-lg hover:bg-pink-500/10 transition"
+              className="block w-full py-4 border-2 border-pink-500 rounded-xl font-bold text-lg hover:bg-pink-500/10 transition text-center"
             >
               {t('auth.signup_button')}
             </Link>

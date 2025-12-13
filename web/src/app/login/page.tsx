@@ -2,18 +2,43 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
     const { t } = useTranslation();
+    const router = useRouter();
+    const { login, isLoading: authLoading } = useAuth();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Demo - just show alert
-        alert(`${t('auth.login_button')}: ${email}`);
+        setError('');
+        setIsLoading(true);
+
+        const result = await login(email, password);
+
+        if (result.success) {
+            router.push('/dashboard');
+        } else {
+            setError(result.error || t('auth.invalid_credentials') || 'Login failed');
+        }
+
+        setIsLoading(false);
     };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -26,6 +51,13 @@ export default function LoginPage() {
                 {/* Title */}
                 <h1 className="text-3xl font-bold mb-8">{t('auth.login_title')}</h1>
 
+                {/* Error message */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-xl text-red-400">
+                        {error}
+                    </div>
+                )}
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -36,6 +68,7 @@ export default function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={t('auth.email')}
                             className="w-full p-4 bg-[#1A1A24] rounded-xl border border-gray-700 focus:border-pink-500 focus:outline-none transition"
+                            required
                         />
                     </div>
 
@@ -47,6 +80,7 @@ export default function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder={t('auth.password')}
                             className="w-full p-4 bg-[#1A1A24] rounded-xl border border-gray-700 focus:border-pink-500 focus:outline-none transition"
+                            required
                         />
                     </div>
 
@@ -58,9 +92,14 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        className="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-bold text-lg hover:opacity-90 transition"
+                        disabled={isLoading}
+                        className="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
-                        {t('auth.login_button')}
+                        {isLoading ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        ) : (
+                            t('auth.login_button')
+                        )}
                     </button>
                 </form>
 

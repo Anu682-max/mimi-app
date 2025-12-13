@@ -5,6 +5,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import { config } from '../config';
 import { preloadTranslations, t, SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES, getAllTranslations, Locale } from '../common/i18n';
@@ -20,12 +23,51 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Database connection
+let isConnected = false;
+
+async function connectDB(): Promise<boolean> {
+    if (isConnected) return true;
+
+    const uri = process.env.MONGODB_URI || config.database.uri;
+    if (!uri || uri === 'mongodb://localhost:27017/indate') {
+        return false;
+    }
+
+    try {
+        await mongoose.connect(uri);
+        isConnected = true;
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// User Schema
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    locale: { type: String, default: 'en' },
+    timezone: { type: String, default: 'UTC' },
+    region: { type: String, default: 'us-east' },
+    isActive: { type: Boolean, default: true },
+    isVerified: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+});
+
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
 // Health check
-app.get('/health', (_req: Request, res: Response): void => {
+app.get('/health', async (_req: Request, res: Response): Promise<void> => {
+    const dbConnected = await connectDB();
     res.json({
         status: 'ok',
         region: config.region,
         version: '1.0.0',
+        database: dbConnected ? 'connected' : 'disconnected',
         timestamp: new Date().toISOString(),
     });
 });
@@ -71,25 +113,142 @@ app.get(`${apiPrefix}/users/translations/:locale`, (req: Request, res: Response)
     res.json(translations);
 });
 
-// Demo auth endpoint
-app.post(`${apiPrefix}/auth/login`, (req: Request, res: Response): void => {
-    const { email } = req.body;
-    res.json({
-        success: true,
-        message: t('auth.login_success', 'en'),
-        user: { email, locale: 'en' },
-        token: 'demo-token',
-    });
+// Real auth endpoint - Login
+app.post(`${apiPrefix}/auth/login`, async (req: Request, res: Response): Promise<void> => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        res.status(400).json({
+            success: false,
+            error: t('validation.email_required', 'en'),
+        });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({
+            success: false,
+            error: 'Database connection failed',
+        });
+        return;
+    }
+
+    try {
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            res.status(401).json({
+                success: false,
+                error: t('auth.invalid_credentials', 'en'),
+            });
+            return;
+        }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            res.status(401).json({
+                success: false,
+                error: t('auth.invalid_credentials', 'en'),
+            });
+            return;
+        }
+
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, role: user.role },
+            jwtSecret,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            message: t('auth.login_success', user.locale || 'en'),
+            user: {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                locale: user.locale,
+            },
+            token,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+        });
+    }
 });
 
-app.post(`${apiPrefix}/auth/register`, (req: Request, res: Response): void => {
-    const { email, locale = 'en' } = req.body;
-    res.json({
-        success: true,
-        message: t('auth.register_success', locale),
-        user: { email, locale },
-        token: 'demo-token',
-    });
+// Register endpoint
+app.post(`${apiPrefix}/auth/register`, async (req: Request, res: Response): Promise<void> => {
+    const { email, password, firstName, lastName, locale = 'en' } = req.body;
+
+    if (!email || !password || !firstName) {
+        res.status(400).json({
+            success: false,
+            error: t('validation.field_required', locale, { field: 'Email, password, firstName' }),
+        });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({
+            success: false,
+            error: 'Database connection failed',
+        });
+        return;
+    }
+
+    try {
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            res.status(400).json({
+                success: false,
+                error: t('auth.email_exists', locale),
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            firstName,
+            lastName,
+            locale,
+        });
+
+        await user.save();
+
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, role: user.role },
+            jwtSecret,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            success: true,
+            message: t('auth.register_success', locale),
+            user: {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                locale: user.locale,
+            },
+            token,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+        });
+    }
 });
 
 // 404 handler

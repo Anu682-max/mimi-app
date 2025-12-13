@@ -2,12 +2,12 @@
  * Vercel Serverless API Entry Point
  */
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
 import { config } from '../config';
-import { preloadTranslations, t, SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES, getAllTranslations } from '../common/i18n';
+import { preloadTranslations, t, SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES, getAllTranslations, Locale } from '../common/i18n';
 
 // Preload translations
 preloadTranslations();
@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response): void => {
     res.json({
         status: 'ok',
         region: config.region,
@@ -30,12 +30,21 @@ app.get('/health', (_req, res) => {
     });
 });
 
+// Root route
+app.get('/', (_req: Request, res: Response): void => {
+    res.json({
+        app: 'InDate API',
+        version: '1.0.0',
+        docs: '/api/v1/users/locales',
+    });
+});
+
 // API prefix
 const apiPrefix = `/api/${config.apiVersion}`;
 
 // Get available locales
-app.get(`${apiPrefix}/users/locales`, (_req, res) => {
-    const locales = SUPPORTED_LOCALES.map(code => ({
+app.get(`${apiPrefix}/users/locales`, (_req: Request, res: Response): void => {
+    const locales = SUPPORTED_LOCALES.map((code: Locale) => ({
         code,
         name: LOCALE_DISPLAY_NAMES[code],
     }));
@@ -47,10 +56,10 @@ app.get(`${apiPrefix}/users/locales`, (_req, res) => {
 });
 
 // Get translations for a locale
-app.get(`${apiPrefix}/users/translations/:locale`, (req, res) => {
+app.get(`${apiPrefix}/users/translations/:locale`, (req: Request, res: Response): void => {
     const locale = req.params.locale;
 
-    if (!SUPPORTED_LOCALES.includes(locale as any)) {
+    if (!SUPPORTED_LOCALES.includes(locale as Locale)) {
         res.status(400).json({
             error: 'Invalid locale',
             message: `Locale '${locale}' is not supported`,
@@ -58,12 +67,12 @@ app.get(`${apiPrefix}/users/translations/:locale`, (req, res) => {
         return;
     }
 
-    const translations = getAllTranslations(locale as any);
+    const translations = getAllTranslations(locale as Locale);
     res.json(translations);
 });
 
 // Demo auth endpoint
-app.post(`${apiPrefix}/auth/login`, (req, res) => {
+app.post(`${apiPrefix}/auth/login`, (req: Request, res: Response): void => {
     const { email } = req.body;
     res.json({
         success: true,
@@ -73,7 +82,7 @@ app.post(`${apiPrefix}/auth/login`, (req, res) => {
     });
 });
 
-app.post(`${apiPrefix}/auth/register`, (req, res) => {
+app.post(`${apiPrefix}/auth/register`, (req: Request, res: Response): void => {
     const { email, locale = 'en' } = req.body;
     res.json({
         success: true,
@@ -84,7 +93,7 @@ app.post(`${apiPrefix}/auth/register`, (req, res) => {
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: Request, res: Response): void => {
     res.status(404).json({
         error: 'Not Found',
         message: `Cannot ${req.method} ${req.path}`,

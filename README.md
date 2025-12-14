@@ -93,8 +93,40 @@ OPENAI_API_KEY=sk-...
 
 - [Хөгжүүлэлтийн Заавар (MN)](docs/DEVELOPMENT_MN.md)
 - [TODO Жагсаалт (MN)](docs/TODO_MN.md)
+- **[Team Workflow Guide](docs/TEAM_WORKFLOW.md)** ← チーム開発ワークフロー
 
-## 👥 Team
+## 👥 Team Development
+
+### New Team Member Setup
+
+```bash
+# 1. Clone repository
+git clone https://github.com/dxmaster-net/indate.git
+cd indate
+
+# 2. Run setup script (Mac/Linux)
+bash scripts/team-setup.sh
+
+# 3. Create your feature branch
+git checkout -b feature/your-feature-name
+
+# 4. Start developing!
+```
+
+### Workflow
+
+1. **Create Branch**: `git checkout -b feature/your-feature`
+2. **Develop**: Make changes and commit
+3. **Push**: `git push origin feature/your-feature`
+4. **Create PR**: Open Pull Request on GitHub
+5. **Review**: Team reviews your code
+6. **Merge**: Auto-deploy to production after merge
+
+📚 **詳細**: [TEAM_WORKFLOW.md](docs/TEAM_WORKFLOW.md) を参照
+
+---
+
+## 👥 Contact
 
 Contact via Slack for questions.
 

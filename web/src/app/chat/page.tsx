@@ -122,11 +122,48 @@ export default function ChatPage() {
         fetchMessages(conv.id);
     };
 
-    const toggleTranslation = (msgId: string) => {
-        setShowTranslated(prev => ({
-            ...prev,
-            [msgId]: !prev[msgId],
-        }));
+    const toggleTranslation = async (msgId: string) => {
+        const msg = messages.find(m => m.id === msgId);
+        if (!msg) return;
+
+        // If already translated, just toggle view
+        if (msg.translatedContent) {
+            setShowTranslated(prev => ({
+                ...prev,
+                [msgId]: !prev[msgId],
+            }));
+            return;
+        }
+
+        // Request translation from API
+        try {
+            const response = await fetch(`${API_URL}/api/v1/messages/${msgId}/translate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    toLocale: user?.locale || 'en',
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Update message with translation
+                setMessages(prev => prev.map(m =>
+                    m.id === msgId
+                        ? { ...m, translatedContent: data.translatedContent }
+                        : m
+                ));
+                setShowTranslated(prev => ({
+                    ...prev,
+                    [msgId]: true,
+                }));
+            }
+        } catch (error) {
+            console.error('Translation failed:', error);
+        }
     };
 
     const getOtherParticipant = (conv: Conversation) => {
@@ -218,19 +255,21 @@ export default function ChatPage() {
                                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[80%] ${isOwn ? 'order-2' : ''}`}>
                                             <div className={`p-3 rounded-2xl ${isOwn
-                                                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 rounded-br-sm'
-                                                    : 'bg-[#1A1A24] rounded-bl-sm'
+                                                ? 'bg-gradient-to-r from-pink-500 to-rose-500 rounded-br-sm'
+                                                : 'bg-[#1A1A24] rounded-bl-sm'
                                                 }`}>
                                                 <p>{showingTranslated ? msg.translatedContent : msg.content}</p>
                                             </div>
-                                            {msg.originalLocale && msg.originalLocale !== user?.locale && (
+                                            {!isOwn && (
                                                 <button
                                                     onClick={() => toggleTranslation(msg.id)}
                                                     className="text-xs text-gray-500 mt-1 hover:text-gray-300"
                                                 >
                                                     {showingTranslated
                                                         ? t('chat.show_original')
-                                                        : `${t('chat.translate_from')} ${msg.originalLocale.toUpperCase()}`
+                                                        : msg.translatedContent
+                                                            ? t('chat.show_translation')
+                                                            : `🌐 ${t('chat.translate')}`
                                                     }
                                                 </button>
                                             )}

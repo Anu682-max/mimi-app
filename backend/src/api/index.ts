@@ -615,6 +615,154 @@ app.post(`${apiPrefix}/messages`, async (req: Request, res: Response): Promise<v
     }
 });
 
+// AI Translation API
+app.post(`${apiPrefix}/translate`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { text, fromLocale, toLocale } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!text || !toLocale) {
+        res.status(400).json({ success: false, error: 'text and toLocale required' });
+        return;
+    }
+
+    try {
+        const openaiKey = process.env.OPENAI_API_KEY;
+
+        if (!openaiKey) {
+            // Mock translation for demo (just return original with language tag)
+            res.json({
+                success: true,
+                translatedText: `[${toLocale.toUpperCase()}] ${text}`,
+                fromLocale: fromLocale || 'auto',
+                toLocale,
+                mock: true,
+            });
+            return;
+        }
+
+        // Real OpenAI translation
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${openaiKey}`,
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    {
+                        role: 'system',
+                        content: `You are a translator. Translate the following text to ${toLocale}. Only respond with the translation, nothing else.`,
+                    },
+                    {
+                        role: 'user',
+                        content: text,
+                    },
+                ],
+                max_tokens: 500,
+                temperature: 0.3,
+            }),
+        });
+
+        const data = await response.json();
+        const translatedText = data.choices?.[0]?.message?.content?.trim() || text;
+
+        res.json({
+            success: true,
+            translatedText,
+            fromLocale: fromLocale || 'auto',
+            toLocale,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Translation failed' });
+    }
+});
+
+// Translate message in conversation
+app.post(`${apiPrefix}/messages/:messageId/translate`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { messageId } = req.params;
+    const { toLocale } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!toLocale) {
+        res.status(400).json({ success: false, error: 'toLocale required' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const message = await Message.findById(messageId);
+        if (!message) {
+            res.status(404).json({ success: false, error: 'Message not found' });
+            return;
+        }
+
+        const openaiKey = process.env.OPENAI_API_KEY;
+        let translatedContent: string;
+
+        if (!openaiKey) {
+            // Mock translation
+            translatedContent = `[${toLocale.toUpperCase()}] ${message.content}`;
+        } else {
+            // Real OpenAI translation
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openaiKey}`,
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `You are a translator. Translate the following text to ${toLocale}. Only respond with the translation, nothing else.`,
+                        },
+                        {
+                            role: 'user',
+                            content: message.content,
+                        },
+                    ],
+                    max_tokens: 500,
+                    temperature: 0.3,
+                }),
+            });
+
+            const data = await response.json();
+            translatedContent = data.choices?.[0]?.message?.content?.trim() || message.content;
+        }
+
+        // Save translation to message
+        message.translatedContent = translatedContent;
+        await message.save();
+
+        res.json({
+            success: true,
+            messageId,
+            originalContent: message.content,
+            translatedContent,
+            toLocale,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Translation failed' });
+    }
+});
+
 // 404 handler
 app.use((req: Request, res: Response): void => {
     res.status(404).json({

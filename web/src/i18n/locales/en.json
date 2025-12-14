@@ -42,6 +42,7 @@
         "no_messages": "No messages yet",
         "type_message": "Type a message...",
         "send": "Send",
+        "translate": "Translate",
         "translated_from": "Translated from {{language}}",
         "show_original": "Show Original",
         "show_translation": "Show Translation",

@@ -42,6 +42,7 @@
         "no_messages": "メッセージはまだありません",
         "type_message": "メッセージを入力...",
         "send": "送信",
+        "translate": "翻訳する",
         "translated_from": "{{language}}から翻訳",
         "show_original": "原文を表示",
         "show_translation": "翻訳を表示",

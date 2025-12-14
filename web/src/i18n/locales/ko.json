@@ -42,6 +42,7 @@
         "no_messages": "아직 메시지가 없습니다",
         "type_message": "메시지 입력...",
         "send": "보내기",
+        "translate": "번역하기",
         "translated_from": "{{language}}에서 번역됨",
         "show_original": "원문 보기",
         "show_translation": "번역 보기",

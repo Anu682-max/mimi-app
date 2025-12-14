@@ -39,16 +39,14 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all ${
-                  isActive(item.path)
+                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all ${isActive(item.path)
                     ? 'bg-gradient-to-r from-pink-500/20 to-purple-600/20 text-pink-400 border border-pink-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
+                  }`}
               >
                 <Icon
-                  className={`mr-3 flex-shrink-0 h-6 w-6 ${
-                    isActive(item.path) ? 'text-pink-400' : 'text-gray-400 group-hover:text-white'
-                  }`}
+                  className={`mr-3 flex-shrink-0 h-6 w-6 ${isActive(item.path) ? 'text-pink-400' : 'text-gray-400 group-hover:text-white'
+                    }`}
                 />
                 {item.name}
               </Link>
@@ -61,11 +59,11 @@ export default function Sidebar() {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="h-10 w-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                {user.name?.charAt(0).toUpperCase() || 'U'}
+                {user.firstName?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user.name || 'User'}</p>
+              <p className="text-sm font-medium text-white">{user.firstName || 'User'}</p>
               <p className="text-xs text-gray-400">{user.email}</p>
             </div>
           </div>

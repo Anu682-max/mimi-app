@@ -8,7 +8,7 @@ import { authMiddleware } from '../common/middleware/auth.middleware';
 import { createError } from '../common/middleware/error.middleware';
 import { t } from '../common/i18n';
 
-export const chatRouter = Router();
+export const chatRouter: Router = Router();
 
 /**
  * GET /chat/conversations

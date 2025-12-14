@@ -21,7 +21,7 @@ import { chatRouter } from './chat/chat.routes';
 import { localeMiddleware } from './common/middleware/locale.middleware';
 import { errorHandler } from './common/middleware/error.middleware';
 
-const app = express();
+const app: express.Express = express();
 const httpServer = createServer(app);
 
 // Socket.io for real-time chat

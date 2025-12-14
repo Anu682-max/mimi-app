@@ -47,7 +47,7 @@ export default function LocationDisplay() {
       </button>
 
       {showPicker && (
-        <div className="absolute top-full mt-2 left-0 bg-[#1a1a24] border border-gray-700 rounded-lg shadow-xl p-2 min-w-[200px] z-50">
+        <div className="absolute top-full mt-2 left-0 bg-[#1a1a24] border border-gray-700 rounded-lg shadow-xl p-2 min-w-50 z-50">
           <div className="text-xs text-gray-400 px-2 py-1 mb-1">Хот сонгох</div>
           {popularCities.map((city) => (
             <button

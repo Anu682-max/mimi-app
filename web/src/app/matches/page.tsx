@@ -53,7 +53,7 @@ export default function MatchesPage() {
                         <p className="text-gray-400 mb-8">Discover хуудсаар очоод like дарж эхлээрэй!</p>
                         <Link
                             href="/discover"
-                            className="inline-block px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
+                            className="inline-block px-6 py-3 bg-linear-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
                         >
                             Discover руу очих
                         </Link>
@@ -68,7 +68,7 @@ export default function MatchesPage() {
                                     className="bg-[#13131A] rounded-2xl overflow-hidden border border-gray-800 hover:border-pink-500/50 transition-all group"
                                 >
                                     {/* Photo */}
-                                    <div className="aspect-[3/4] bg-gradient-to-br from-gray-700 to-gray-800 relative overflow-hidden">
+                                    <div className="aspect-3/4 bg-linear-to-br from-gray-700 to-gray-800 relative overflow-hidden">
                                         {match.photos && match.photos.length > 0 ? (
                                             <Image
                                                 src={match.photos[0]}

@@ -85,7 +85,7 @@ export default function DiscoverPage() {
                         <p className="text-gray-400 mb-8">Check back later for new matches!</p>
                         <button
                             onClick={() => { setCurrentIndex(0); }}
-                            className="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
+                            className="px-6 py-3 bg-linear-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
                         >
                             Refresh
                         </button>
@@ -93,9 +93,9 @@ export default function DiscoverPage() {
                 ) : currentUser ? (
                     <div className="w-full max-w-md">
                         {/* Profile Card */}
-                        <div className="bg-gradient-to-b from-pink-500/10 to-transparent rounded-3xl overflow-hidden border border-gray-700">
+                        <div className="bg-linear-to-b from-pink-500/10 to-transparent rounded-3xl overflow-hidden border border-gray-700">
                             {/* Photo */}
-                            <div className="aspect-[3/4] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden">
+                            <div className="aspect-3/4 bg-linear-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden">
                                 {currentUser.photos && currentUser.photos.length > 0 ? (
                                     <img
                                         src={currentUser.photos[0]}
@@ -152,7 +152,7 @@ export default function DiscoverPage() {
                             </button>
                             <button
                                 onClick={() => handleSwipeAction('like')}
-                                className="w-16 h-16 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-3xl hover:opacity-90 transition"
+                                className="w-16 h-16 bg-linear-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-3xl hover:opacity-90 transition"
                             >
                                 ❤️
                             </button>
@@ -175,7 +175,7 @@ export default function DiscoverPage() {
                         <div className="flex gap-4 justify-center">
                             <Link
                                 href="/chat"
-                                className="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
+                                className="px-6 py-3 bg-linear-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
                             >
                                 {t('matching.send_message')}
                             </Link>

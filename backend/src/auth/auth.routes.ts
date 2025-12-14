@@ -4,14 +4,14 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { userRepository } from '../user/user.repository';
 import { t } from '../common/i18n';
 import { config } from '../config';
 import { createError } from '../common/middleware/error.middleware';
 import { logger } from '../common/logger';
 
-export const authRouter = Router();
+export const authRouter: Router = Router();
 
 /**
  * POST /auth/register
@@ -64,10 +64,11 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
         });
 
         // Generate token
+        const jwtOptions: SignOptions = { expiresIn: config.jwt.expiresIn as (string | number) };
         const token = jwt.sign(
             { userId: user._id, email: user.email },
-            config.jwt.secret,
-            { expiresIn: config.jwt.expiresIn }
+            config.jwt.secret as string,
+            jwtOptions
         );
 
         logger.info(`User registered: ${user.email}`);
@@ -124,8 +125,8 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
         // Generate token
         const token = jwt.sign(
             { userId: user._id, email: user.email },
-            config.jwt.secret,
-            { expiresIn: config.jwt.expiresIn }
+            config.jwt.secret as string,
+            { expiresIn: '7d' }
         );
 
         logger.info(`User logged in: ${user.email}`);

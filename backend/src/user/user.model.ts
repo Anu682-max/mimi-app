@@ -17,6 +17,7 @@ export interface IUser extends Document {
     firstName: string;
     lastName?: string;
     birthday: Date;
+    age?: number; // Virtual field
     gender: 'man' | 'woman' | 'nonbinary' | 'other';
     bio?: string;
     photos: string[];

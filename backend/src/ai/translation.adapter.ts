@@ -4,6 +4,15 @@
  * Pluggable interface for translation providers
  */
 
+// OpenAI API response interface
+interface OpenAIResponse {
+    choices: Array<{
+        message?: {
+            content?: string;
+        };
+    }>;
+}
+
 export interface TranslationResult {
     translatedText: string;
     sourceLocale: string;
@@ -83,7 +92,7 @@ export class OpenAITranslationAdapter implements TranslationAdapter {
                 throw new Error(`OpenAI API error: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = await response.json() as OpenAIResponse;
             const translatedText = data.choices[0]?.message?.content?.trim() || text;
 
             return {
@@ -124,7 +133,7 @@ export class OpenAITranslationAdapter implements TranslationAdapter {
                 }),
             });
 
-            const data = await response.json();
+            const data = await response.json() as OpenAIResponse;
             return data.choices[0]?.message?.content?.trim().toLowerCase() || 'en';
         } catch (error) {
             console.error('Language detection error:', error);

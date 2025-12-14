@@ -9,7 +9,8 @@ import winston from 'winston';
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 
 // Custom log format
-const logFormat = printf(({ level, message, timestamp, stack, ...metadata }) => {
+const logFormat = printf((info: winston.Logform.TransformableInfo) => {
+    const { level, message, timestamp, stack, ...metadata } = info;
     let msg = `${timestamp} [${level}]: ${message}`;
 
     if (Object.keys(metadata).length > 0) {
@@ -49,7 +50,6 @@ if (process.env.NODE_ENV === 'production') {
     logger.add(
         new winston.transports.File({
             filename: 'logs/error.log',
-            level: 'error',
             maxsize: 5242880, // 5MB
             maxFiles: 5,
         })

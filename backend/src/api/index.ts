@@ -2,7 +2,7 @@
  * Vercel Serverless API Entry Point
  */
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
@@ -12,10 +12,19 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { preloadTranslations, t, SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES, getAllTranslations, Locale } from '../common/i18n';
 
+// OpenAI API response interface
+interface OpenAIResponse {
+    choices: Array<{
+        message?: {
+            content?: string;
+        };
+    }>;
+}
+
 // Preload translations
 preloadTranslations();
 
-const app = express();
+const app: Application = express();
 
 // Middleware
 app.use(helmet());
@@ -669,7 +678,7 @@ app.post(`${apiPrefix}/translate`, async (req: Request, res: Response): Promise<
             }),
         });
 
-        const data = await response.json();
+        const data = await response.json() as OpenAIResponse;
         const translatedText = data.choices?.[0]?.message?.content?.trim() || text;
 
         res.json({
@@ -743,7 +752,7 @@ app.post(`${apiPrefix}/messages/:messageId/translate`, async (req: Request, res:
                 }),
             });
 
-            const data = await response.json();
+            const data = await response.json() as OpenAIResponse;
             translatedContent = data.choices?.[0]?.message?.content?.trim() || message.content;
         }
 

@@ -12,7 +12,7 @@ import { t } from '../common/i18n';
 import { config, getRegionConfig } from '../config';
 import { logger } from '../common/logger';
 
-export const matchRouter = Router();
+export const matchRouter: Router = Router();
 
 // Match model (inline for brevity)
 const matchSchema = new mongoose.Schema({
@@ -129,7 +129,7 @@ matchRouter.post('/like/:userId', authMiddleware, async (req: Request, res: Resp
         }
 
         // Add like
-        const alreadyLiked = match.likes.some(l => l.userId.toString() === currentUserId);
+        const alreadyLiked = match.likes.some(l => l.userId?.toString() === currentUserId);
         if (!alreadyLiked) {
             match.likes.push({ userId: new mongoose.Types.ObjectId(currentUserId) });
         }

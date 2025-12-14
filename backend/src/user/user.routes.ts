@@ -8,7 +8,7 @@ import { t, SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES, getAllTranslations } from '
 import { authMiddleware } from '../common/middleware/auth.middleware';
 import { createError } from '../common/middleware/error.middleware';
 
-export const userRouter = Router();
+export const userRouter: Router = Router();
 
 /**
  * GET /users/me

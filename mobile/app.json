@@ -1,0 +1,49 @@
+{
+    "expo": {
+        "name": "InDate",
+        "slug": "indate",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "dark",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#0A0A0F"
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.indate.app"
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#0A0A0F"
+            },
+            "package": "com.indate.app"
+        },
+        "web": {
+            "favicon": "./assets/favicon.png"
+        },
+        "plugins": [
+            [
+                "expo-notifications",
+                {
+                    "icon": "./assets/notification-icon.png",
+                    "color": "#EC4899"
+                }
+            ],
+            "expo-localization",
+            "expo-router"
+        ],
+        "extra": {
+            "apiUrl": "https://indate.vercel.app",
+            "eas": {
+                "projectId": "your-eas-project-id"
+            }
+        }
+    }
+}

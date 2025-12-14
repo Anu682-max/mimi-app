@@ -5,6 +5,8 @@
  */
 
 import mongoose from 'mongoose';
+import * as fs from 'fs';
+import * as path from 'path';
 import User, { IUser } from './user.model';
 import { logger } from '../common/logger';
 import { config, getRegionConfig } from '../config';
@@ -60,10 +62,38 @@ export interface FindNearbyOptions {
  * to filter users and is ready for multi-region infrastructure.
  */
 export class UserRepository {
+    private static MOCK_DB_PATH = path.join(process.cwd(), 'mock_db.json');
     private static mockUsers: any[] = [];
+    private static isLoaded = false;
 
     private isConnected(): boolean {
         return mongoose.connection.readyState === 1;
+    }
+
+    private static loadMockData() {
+        if (UserRepository.isLoaded) return;
+        try {
+            if (fs.existsSync(UserRepository.MOCK_DB_PATH)) {
+                const data = fs.readFileSync(UserRepository.MOCK_DB_PATH, 'utf-8');
+                UserRepository.mockUsers = JSON.parse(data);
+                logger.info(`[MOCK DB] Loaded ${UserRepository.mockUsers.length} users from disk.`);
+            }
+        } catch (error) {
+            logger.warn('[MOCK DB] Failed to load mock data:', error);
+        }
+        UserRepository.isLoaded = true;
+    }
+
+    private static saveMockData() {
+        try {
+            fs.writeFileSync(UserRepository.MOCK_DB_PATH, JSON.stringify(UserRepository.mockUsers, null, 2));
+        } catch (error) {
+            logger.error('[MOCK DB] Failed to save mock data:', error);
+        }
+    }
+
+    constructor() {
+        UserRepository.loadMockData();
     }
 
     /**
@@ -71,6 +101,7 @@ export class UserRepository {
      */
     async getById(userId: string, region?: string): Promise<IUser | null> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
             if (!user) return null;
             if (region && user.region !== region) return null;
@@ -92,6 +123,7 @@ export class UserRepository {
      */
     async getByEmail(email: string): Promise<IUser | null> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             // Check mock users
             const user = UserRepository.mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
             return (user as IUser) || null;
@@ -134,10 +166,12 @@ export class UserRepository {
         const user = new User(userData);
 
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             user._id = new mongoose.Types.ObjectId();
             // Assign defaults manually if needed, or rely on Mongoose default assignment
             // (Mongoose defaults run on 'new User()')
             UserRepository.mockUsers.push(user);
+            UserRepository.saveMockData(); // Save to file
             logger.info(`[MOCK DB] User created: ${user._id}`);
             return user;
         }
@@ -153,6 +187,7 @@ export class UserRepository {
      */
     async update(userId: string, data: UpdateUserDTO): Promise<IUser | null> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const index = UserRepository.mockUsers.findIndex(u => u._id.toString() === userId);
             if (index === -1) return null;
 
@@ -170,6 +205,7 @@ export class UserRepository {
             }
 
             UserRepository.mockUsers[index] = updatedUser;
+            UserRepository.saveMockData(); // Save to file
             return updatedUser as IUser;
         }
 
@@ -195,8 +231,12 @@ export class UserRepository {
      */
     async updateLocale(userId: string, locale: string): Promise<IUser | null> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
-            if (user) user.locale = locale;
+            if (user) {
+                user.locale = locale;
+                UserRepository.saveMockData();
+            }
             return user;
         }
         return User.findByIdAndUpdate(
@@ -211,8 +251,12 @@ export class UserRepository {
      */
     async updateTimezone(userId: string, timezone: string): Promise<IUser | null> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
-            if (user) user.timezone = timezone;
+            if (user) {
+                user.timezone = timezone;
+                UserRepository.saveMockData();
+            }
             return user;
         }
         return User.findByIdAndUpdate(
@@ -227,10 +271,12 @@ export class UserRepository {
      */
     async updateOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
             if (user) {
                 user.isOnline = isOnline;
                 user.lastOnline = new Date();
+                UserRepository.saveMockData();
             }
             return;
         }
@@ -248,6 +294,7 @@ export class UserRepository {
      */
     async findNearby(options: FindNearbyOptions): Promise<IUser[]> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             return UserRepository.mockUsers.filter(u =>
                 u.region === (options.region || config.region) &&
                 u.isActive !== false
@@ -318,6 +365,7 @@ export class UserRepository {
      */
     async getByRegion(region: string, options?: { limit?: number; offset?: number }): Promise<IUser[]> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             return UserRepository.mockUsers.filter(u => u.region === region).slice(options?.offset || 0, (options?.offset || 0) + (options?.limit || 100)) as IUser[];
         }
         return User.find({ region, isActive: true })
@@ -330,6 +378,7 @@ export class UserRepository {
      */
     async countByRegion(region: string): Promise<number> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             return UserRepository.mockUsers.filter(u => u.region === region).length;
         }
         return User.countDocuments({ region, isActive: true });
@@ -340,8 +389,12 @@ export class UserRepository {
      */
     async softDelete(userId: string): Promise<void> {
         if (!this.isConnected()) {
+            UserRepository.loadMockData();
             const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
-            if (user) user.isActive = false;
+            if (user) {
+                user.isActive = false;
+                UserRepository.saveMockData();
+            }
             return;
         }
         await User.findByIdAndUpdate(userId, { $set: { isActive: false } });

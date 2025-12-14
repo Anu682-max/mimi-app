@@ -43,7 +43,7 @@ async function connectDB(): Promise<boolean> {
     }
 }
 
-// User Schema
+// User Schema with profile fields
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
@@ -55,6 +55,18 @@ const userSchema = new mongoose.Schema({
     region: { type: String, default: 'us-east' },
     isActive: { type: Boolean, default: true },
     isVerified: { type: Boolean, default: false },
+
+    // Profile fields
+    bio: { type: String },
+    age: { type: Number },
+    gender: { type: String, enum: ['male', 'female', 'other'] },
+    lookingFor: { type: String, enum: ['male', 'female', 'both'] },
+    photos: [{ type: String }],
+    interests: [{ type: String }],
+    occupation: { type: String },
+    city: { type: String },
+    country: { type: String },
+
     createdAt: { type: Date, default: Date.now },
 });
 
@@ -249,6 +261,83 @@ app.post(`${apiPrefix}/auth/register`, async (req: Request, res: Response): Prom
             error: 'Server error',
         });
     }
+});
+
+// Discover API - Get users for swiping
+app.get(`${apiPrefix}/discover`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        // Get users excluding current user
+        const users = await User.find({
+            _id: { $ne: decoded.userId },
+            isActive: true,
+            role: 'user',
+        })
+            .select('-password -email')
+            .limit(20)
+            .lean();
+
+        res.json({
+            success: true,
+            users: users.map((u: any) => ({
+                id: u._id,
+                firstName: u.firstName,
+                lastName: u.lastName,
+                bio: u.bio,
+                age: u.age,
+                gender: u.gender,
+                photos: u.photos || [],
+                interests: u.interests || [],
+                occupation: u.occupation,
+                city: u.city,
+                country: u.country,
+                locale: u.locale,
+            })),
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+});
+
+// Like/Pass API - Record swipe action
+app.post(`${apiPrefix}/discover/swipe`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { targetUserId, action } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!targetUserId || !['like', 'pass'].includes(action)) {
+        res.status(400).json({ success: false, error: 'Invalid request' });
+        return;
+    }
+
+    // For now, just return success (full matching logic would require a Match collection)
+    res.json({
+        success: true,
+        action,
+        targetUserId,
+        // In a real app, check if mutual like = match
+        isMatch: action === 'like' ? Math.random() > 0.7 : false,
+    });
 });
 
 // 404 handler

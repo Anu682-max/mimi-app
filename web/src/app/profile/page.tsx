@@ -19,6 +19,7 @@ interface ProfileData {
     city: string;
     country: string;
     locale: string;
+    photos: string[];
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -40,11 +41,13 @@ export default function ProfilePage() {
         city: '',
         country: '',
         locale: 'en',
+        photos: [],
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
     const [newInterest, setNewInterest] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -79,6 +82,7 @@ export default function ProfilePage() {
                     city: data.profile.city || '',
                     country: data.profile.country || '',
                     locale: data.profile.locale || 'en',
+                    photos: data.profile.photos || [],
                 });
             }
         } catch (error) {
@@ -136,6 +140,75 @@ export default function ProfilePage() {
         });
     };
 
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Check file size (max 500KB)
+        if (file.size > 500000) {
+            setMessage('❌ Image too large. Max 500KB.');
+            return;
+        }
+
+        setIsUploading(true);
+        setMessage('');
+
+        try {
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const base64 = event.target?.result as string;
+
+                const response = await fetch(`${API_URL}/api/v1/profile/photos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ photo: base64 }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    setMessage('✅ Photo uploaded!');
+                    setProfile(prev => ({
+                        ...prev,
+                        photos: [...prev.photos, base64],
+                    }));
+                } else {
+                    setMessage(`❌ ${data.error}`);
+                }
+                setIsUploading(false);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            setMessage('❌ Upload failed');
+            setIsUploading(false);
+        }
+    };
+
+    const deletePhoto = async (index: number) => {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/profile/photos/${index}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setProfile(prev => ({
+                    ...prev,
+                    photos: prev.photos.filter((_, i) => i !== index),
+                }));
+                setMessage('✅ Photo deleted');
+            }
+        } catch (error) {
+            setMessage('❌ Delete failed');
+        }
+    };
+
     if (authLoading || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -171,6 +244,44 @@ export default function ProfilePage() {
             {/* Form */}
             <section className="p-4 max-w-lg mx-auto">
                 <div className="space-y-6">
+                    {/* Photos */}
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-2">Photos ({profile.photos.length}/6)</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {profile.photos.map((photo, i) => (
+                                <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
+                                    <img
+                                        src={photo}
+                                        alt={`Photo ${i + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        onClick={() => deletePhoto(i)}
+                                        className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            {profile.photos.length < 6 && (
+                                <label className="aspect-square rounded-xl border-2 border-dashed border-gray-600 flex items-center justify-center cursor-pointer hover:border-pink-500 transition">
+                                    {isUploading ? (
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
+                                    ) : (
+                                        <span className="text-3xl text-gray-500">+</span>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handlePhotoUpload}
+                                        className="hidden"
+                                        disabled={isUploading}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Basic Info */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>

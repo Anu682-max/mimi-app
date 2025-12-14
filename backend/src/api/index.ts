@@ -763,6 +763,123 @@ app.post(`${apiPrefix}/messages/:messageId/translate`, async (req: Request, res:
     }
 });
 
+// Photo Upload API - Add photo to profile
+app.post(`${apiPrefix}/profile/photos`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { photo } = req.body; // Base64 encoded image
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!photo) {
+        res.status(400).json({ success: false, error: 'Photo data required' });
+        return;
+    }
+
+    // Validate base64 image (simple check)
+    if (!photo.startsWith('data:image/')) {
+        res.status(400).json({ success: false, error: 'Invalid image format. Use base64 data URL.' });
+        return;
+    }
+
+    // Check size (limit to ~500KB base64 which is ~375KB image)
+    if (photo.length > 500000) {
+        res.status(400).json({ success: false, error: 'Image too large. Max 500KB.' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            res.status(404).json({ success: false, error: 'User not found' });
+            return;
+        }
+
+        // Limit to 6 photos
+        if (user.photos && user.photos.length >= 6) {
+            res.status(400).json({ success: false, error: 'Maximum 6 photos allowed' });
+            return;
+        }
+
+        // Add photo
+        if (!user.photos) user.photos = [];
+        user.photos.push(photo);
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Photo uploaded',
+            photoCount: user.photos.length,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Upload failed' });
+    }
+});
+
+// Delete photo from profile
+app.delete(`${apiPrefix}/profile/photos/:index`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { index } = req.params;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const photoIndex = parseInt(index);
+    if (isNaN(photoIndex) || photoIndex < 0) {
+        res.status(400).json({ success: false, error: 'Invalid photo index' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            res.status(404).json({ success: false, error: 'User not found' });
+            return;
+        }
+
+        if (!user.photos || photoIndex >= user.photos.length) {
+            res.status(404).json({ success: false, error: 'Photo not found' });
+            return;
+        }
+
+        // Remove photo
+        user.photos.splice(photoIndex, 1);
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Photo deleted',
+            photoCount: user.photos.length,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Delete failed' });
+    }
+});
+
 // 404 handler
 app.use((req: Request, res: Response): void => {
     res.status(404).json({

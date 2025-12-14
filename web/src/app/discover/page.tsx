@@ -134,11 +134,19 @@ export default function DiscoverPage() {
                     <div className="w-full max-w-md">
                         {/* Profile Card */}
                         <div className="bg-gradient-to-b from-pink-500/10 to-transparent rounded-3xl overflow-hidden border border-gray-700">
-                            {/* Photo Placeholder */}
-                            <div className="aspect-[3/4] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                                <div className="text-8xl">
-                                    {currentUser.gender === 'female' ? '👩' : '👨'}
-                                </div>
+                            {/* Photo */}
+                            <div className="aspect-[3/4] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden">
+                                {currentUser.photos && currentUser.photos.length > 0 ? (
+                                    <img
+                                        src={currentUser.photos[0]}
+                                        alt={currentUser.firstName}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-8xl">
+                                        {currentUser.gender === 'female' ? '👩' : '👨'}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Info */}

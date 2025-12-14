@@ -76,7 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return { success: false, error: errorMessage };
             }
         } catch (error) {
-            return { success: false, error: 'Network error' };
+            console.error('Login error:', error);
+            return { success: false, error: 'Network error. Please check if the backend server is running.' };
         }
     };
 

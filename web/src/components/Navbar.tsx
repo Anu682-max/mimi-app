@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import LocationDisplay from './LocationDisplay';
+import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -15,11 +17,18 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-              💘 InDate
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="text-2xl font-bold bg-linear-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                💘 InDate
+              </div>
+            </Link>
+            
+            {/* Location Display */}
+            <div className="hidden md:block border-l border-gray-700 pl-4">
+              <LocationDisplay />
             </div>
-          </Link>
+          </div>
 
           {/* Navigation Links */}
           {user ? (
@@ -64,6 +73,15 @@ export default function Navbar() {
               >
                 Settings
               </Link>
+              {user?.email === 'test@example.com' && (
+                <Link
+                  href="/admin"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+                >
+                  <ShieldCheckIcon className="w-4 h-4" />
+                  <span>Admin</span>
+                </Link>
+              )}
               <button
                 onClick={logout}
                 className="px-4 py-2 bg-red-500/20 text-red-400 rounded-md text-sm font-medium hover:bg-red-500/30 transition-colors"
@@ -81,7 +99,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-md text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all"
+                className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded-md text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all"
               >
                 Sign Up
               </Link>

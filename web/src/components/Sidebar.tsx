@@ -29,6 +29,15 @@ export default function Sidebar() {
     { name: 'Settings', path: '/settings', icon: Cog6ToothIcon },
   ];
 
+  // Show admin link only for admin users
+  if (user?.email === 'test@example.com') {
+    navItems.push({
+      name: 'Admin Panel',
+      path: '/admin',
+      icon: Cog6ToothIcon,
+    });
+  }
+
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-[#13131A] border-r border-gray-800 fixed left-0 top-16 bottom-0">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
@@ -39,14 +48,16 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all ${isActive(item.path)
-                    ? 'bg-gradient-to-r from-pink-500/20 to-purple-600/20 text-pink-400 border border-pink-500/30'
+                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                  isActive(item.path)
+                    ? 'bg-linear-to-r from-pink-500/20 to-purple-600/20 text-pink-400 border border-pink-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
               >
                 <Icon
-                  className={`mr-3 flex-shrink-0 h-6 w-6 ${isActive(item.path) ? 'text-pink-400' : 'text-gray-400 group-hover:text-white'
-                    }`}
+                  className={`mr-3 shrink-0 h-6 w-6 ${
+                    isActive(item.path) ? 'text-pink-400' : 'text-gray-400 group-hover:text-white'
+                  }`}
                 />
                 {item.name}
               </Link>
@@ -57,8 +68,8 @@ export default function Sidebar() {
         {/* User Info */}
         <div className="px-4 py-4 border-t border-gray-800">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
+            <div className="shrink-0">
+              <div className="h-10 w-10 rounded-full bg-linear-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
                 {user.firstName?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>

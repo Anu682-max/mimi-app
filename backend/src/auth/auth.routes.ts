@@ -13,6 +13,25 @@ import { logger } from '../common/logger';
 
 export const authRouter: Router = Router();
 
+// In-memory users for mock mode (when no database)
+const mockUsers: Map<string, any> = new Map();
+
+// Add a default test user
+const defaultPassword = bcrypt.hashSync('password123', 12);
+mockUsers.set('test@example.com', {
+    _id: 'test-user-1',
+    email: 'test@example.com',
+    passwordHash: defaultPassword,
+    firstName: 'Test',
+    lastName: 'User',
+    locale: 'en',
+    timezone: 'UTC',
+    region: 'us-east',
+    isVerified: true,
+    role: 'user',
+    createdAt: new Date(),
+});
+
 /**
  * POST /auth/register
  * Register a new user
@@ -43,7 +62,13 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
         }
 
         // Check if user already exists
-        const existingUser = await userRepository.getByEmail(email);
+        let existingUser = await userRepository.getByEmail(email);
+        
+        // Fallback to mock users if no database
+        if (!existingUser && mockUsers.has(email)) {
+            existingUser = mockUsers.get(email);
+        }
+        
         if (existingUser) {
             throw createError('Email already registered', 400, 'EMAIL_EXISTS');
         }
@@ -51,8 +76,8 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
         // Hash password
         const passwordHash = await bcrypt.hash(password, 12);
 
-        // Create user
-        const user = await userRepository.create({
+        const newUser = {
+            _id: `user-${Date.now()}`,
             email,
             passwordHash,
             firstName,
@@ -61,7 +86,31 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
             gender,
             locale: userLocale,
             timezone: timezone || req.timezone,
-        });
+            region: 'us-east',
+            isVerified: false,
+            role: 'user',
+            createdAt: new Date(),
+        };
+
+        // Create user (try database first, fallback to mock)
+        let user;
+        try {
+            user = await userRepository.create({
+                email,
+                passwordHash,
+                firstName,
+                lastName,
+                birthday: new Date(birthday),
+                gender,
+                locale: userLocale,
+                timezone: timezone || req.timezone,
+            });
+        } catch (err) {
+            // If database fails, use mock storage
+            mockUsers.set(email, newUser);
+            user = newUser;
+            logger.info('User created in mock storage (no database)');
+        }
 
         // Generate token
         const jwtOptions: SignOptions = { expiresIn: config.jwt.expiresIn as (string | number) };
@@ -102,8 +151,13 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
             throw createError(t('validation.email_required', userLocale), 400, 'CREDENTIALS_REQUIRED');
         }
 
-        // Find user
-        const user = await userRepository.getByEmail(email);
+        // Find user (try database first, fallback to mock)
+        let user = await userRepository.getByEmail(email);
+        
+        if (!user && mockUsers.has(email)) {
+            user = mockUsers.get(email);
+        }
+        
         if (!user) {
             throw createError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
         }

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { sampleUsers, handleSwipe } from '@/utils/mockData';
 
 interface UserProfile {
     id: string;
@@ -20,16 +21,14 @@ interface UserProfile {
     country?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
 export default function DiscoverPage() {
     const { t } = useTranslation();
     const router = useRouter();
-    const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
-    const [users, setUsers] = useState<UserProfile[]>([]);
+    const [users, setUsers] = useState<UserProfile[]>(sampleUsers);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [showMatch, setShowMatch] = useState(false);
     const [matchedUser, setMatchedUser] = useState<UserProfile | null>(null);
 
@@ -39,56 +38,17 @@ export default function DiscoverPage() {
         }
     }, [authLoading, isAuthenticated, router]);
 
-    useEffect(() => {
-        if (token) {
-            fetchUsers();
-        }
-    }, [token]);
-
-    const fetchUsers = async () => {
-        try {
-            const response = await fetch(`${API_URL}/api/v1/discover`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            if (data.success) {
-                setUsers(data.users);
-            }
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSwipe = async (action: 'like' | 'pass') => {
-        if (currentIndex >= users.length) return;
+    const handleSwipeAction = async (action: 'like' | 'pass') => {
+        if (currentIndex >= users.length || !user) return;
 
         const currentUser = users[currentIndex];
+        
+        // Handle swipe and check for match
+        const result = handleSwipe(user.id, currentUser.id, action);
 
-        try {
-            const response = await fetch(`${API_URL}/api/v1/discover/swipe`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    targetUserId: currentUser.id,
-                    action,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.isMatch) {
-                setMatchedUser(currentUser);
-                setShowMatch(true);
-            }
-        } catch (error) {
-            console.error('Swipe error:', error);
+        if (result.isMatch) {
+            setMatchedUser(currentUser);
+            setShowMatch(true);
         }
 
         setCurrentIndex((prev) => prev + 1);
@@ -124,7 +84,7 @@ export default function DiscoverPage() {
                         <h2 className="text-2xl font-bold mb-2">{t('discover.no_more_profiles')}</h2>
                         <p className="text-gray-400 mb-8">Check back later for new matches!</p>
                         <button
-                            onClick={() => { setCurrentIndex(0); fetchUsers(); }}
+                            onClick={() => { setCurrentIndex(0); }}
                             className="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
                         >
                             Refresh
@@ -185,13 +145,13 @@ export default function DiscoverPage() {
                         {/* Swipe Buttons */}
                         <div className="flex justify-center gap-8 mt-6">
                             <button
-                                onClick={() => handleSwipe('pass')}
+                                onClick={() => handleSwipeAction('pass')}
                                 className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-3xl hover:bg-gray-700 transition border-2 border-gray-600"
                             >
                                 ✕
                             </button>
                             <button
-                                onClick={() => handleSwipe('like')}
+                                onClick={() => handleSwipeAction('like')}
                                 className="w-16 h-16 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-3xl hover:opacity-90 transition"
                             >
                                 ❤️

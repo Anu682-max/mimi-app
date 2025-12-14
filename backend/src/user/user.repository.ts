@@ -60,10 +60,23 @@ export interface FindNearbyOptions {
  * to filter users and is ready for multi-region infrastructure.
  */
 export class UserRepository {
+    private static mockUsers: any[] = [];
+
+    private isConnected(): boolean {
+        return mongoose.connection.readyState === 1;
+    }
+
     /**
      * Get user by ID, optionally with region validation
      */
     async getById(userId: string, region?: string): Promise<IUser | null> {
+        if (!this.isConnected()) {
+            const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
+            if (!user) return null;
+            if (region && user.region !== region) return null;
+            return user as IUser;
+        }
+
         const query: any = { _id: new mongoose.Types.ObjectId(userId) };
 
         // If region is specified, ensure user belongs to that region
@@ -78,6 +91,11 @@ export class UserRepository {
      * Get user by email
      */
     async getByEmail(email: string): Promise<IUser | null> {
+        if (!this.isConnected()) {
+            // Check mock users
+            const user = UserRepository.mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+            return (user as IUser) || null;
+        }
         return User.findOne({ email: email.toLowerCase() });
     }
 
@@ -102,7 +120,7 @@ export class UserRepository {
             }
         }
 
-        const user = new User({
+        const userData = {
             ...data,
             locale: data.locale || regionConfig?.defaultLocale || config.defaultLocale,
             timezone: data.timezone || regionConfig?.timezone || 'UTC',
@@ -111,7 +129,18 @@ export class UserRepository {
                 maxDistance: regionConfig?.rules.defaultSearchRadius || 50,
                 autoTranslate: true,
             },
-        });
+        };
+
+        const user = new User(userData);
+
+        if (!this.isConnected()) {
+            user._id = new mongoose.Types.ObjectId();
+            // Assign defaults manually if needed, or rely on Mongoose default assignment
+            // (Mongoose defaults run on 'new User()')
+            UserRepository.mockUsers.push(user);
+            logger.info(`[MOCK DB] User created: ${user._id}`);
+            return user;
+        }
 
         await user.save();
         logger.info(`User created: ${user._id} in region: ${user.region}`);
@@ -123,6 +152,27 @@ export class UserRepository {
      * Update user profile
      */
     async update(userId: string, data: UpdateUserDTO): Promise<IUser | null> {
+        if (!this.isConnected()) {
+            const index = UserRepository.mockUsers.findIndex(u => u._id.toString() === userId);
+            if (index === -1) return null;
+
+            const user = UserRepository.mockUsers[index];
+            const updatedUser = { ...user, ...data };
+
+            // Handle nested preferences manually for mock
+            if (data.preferences) {
+                updatedUser.preferences = { ...user.preferences, ...data.preferences };
+                delete (updatedUser as any).preferences; // cleanup if mixed
+            }
+            // Re-assign preferences correctly
+            if (data.preferences) {
+                updatedUser.preferences = { ...user.preferences, ...data.preferences };
+            }
+
+            UserRepository.mockUsers[index] = updatedUser;
+            return updatedUser as IUser;
+        }
+
         const updateData: any = { ...data };
 
         // Handle nested preferences update
@@ -144,6 +194,11 @@ export class UserRepository {
      * Update user locale
      */
     async updateLocale(userId: string, locale: string): Promise<IUser | null> {
+        if (!this.isConnected()) {
+            const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
+            if (user) user.locale = locale;
+            return user;
+        }
         return User.findByIdAndUpdate(
             userId,
             { $set: { locale } },
@@ -155,6 +210,11 @@ export class UserRepository {
      * Update user timezone
      */
     async updateTimezone(userId: string, timezone: string): Promise<IUser | null> {
+        if (!this.isConnected()) {
+            const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
+            if (user) user.timezone = timezone;
+            return user;
+        }
         return User.findByIdAndUpdate(
             userId,
             { $set: { timezone } },
@@ -166,6 +226,14 @@ export class UserRepository {
      * Update user's online status
      */
     async updateOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
+        if (!this.isConnected()) {
+            const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
+            if (user) {
+                user.isOnline = isOnline;
+                user.lastOnline = new Date();
+            }
+            return;
+        }
         await User.findByIdAndUpdate(userId, {
             $set: {
                 isOnline,
@@ -179,6 +247,13 @@ export class UserRepository {
      * Region-aware: only returns users from the same region by default
      */
     async findNearby(options: FindNearbyOptions): Promise<IUser[]> {
+        if (!this.isConnected()) {
+            return UserRepository.mockUsers.filter(u =>
+                u.region === (options.region || config.region) &&
+                u.isActive !== false
+            ).slice(0, options.limit || 50) as IUser[];
+        }
+
         const {
             latitude,
             longitude,
@@ -242,6 +317,9 @@ export class UserRepository {
      * Get users by region (for admin/analytics)
      */
     async getByRegion(region: string, options?: { limit?: number; offset?: number }): Promise<IUser[]> {
+        if (!this.isConnected()) {
+            return UserRepository.mockUsers.filter(u => u.region === region).slice(options?.offset || 0, (options?.offset || 0) + (options?.limit || 100)) as IUser[];
+        }
         return User.find({ region, isActive: true })
             .skip(options?.offset || 0)
             .limit(options?.limit || 100);
@@ -251,6 +329,9 @@ export class UserRepository {
      * Count users by region
      */
     async countByRegion(region: string): Promise<number> {
+        if (!this.isConnected()) {
+            return UserRepository.mockUsers.filter(u => u.region === region).length;
+        }
         return User.countDocuments({ region, isActive: true });
     }
 
@@ -258,6 +339,11 @@ export class UserRepository {
      * Delete user (soft delete)
      */
     async softDelete(userId: string): Promise<void> {
+        if (!this.isConnected()) {
+            const user = UserRepository.mockUsers.find(u => u._id.toString() === userId);
+            if (user) user.isActive = false;
+            return;
+        }
         await User.findByIdAndUpdate(userId, { $set: { isActive: false } });
         logger.info(`User soft deleted: ${userId}`);
     }

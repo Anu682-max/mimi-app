@@ -172,7 +172,11 @@ export class MockTranslationAdapter implements TranslationAdapter {
 export function createTranslationAdapter(provider: string, apiKey?: string): TranslationAdapter {
     switch (provider) {
         case 'openai':
-            if (!apiKey) throw new Error('OpenAI API key required');
+        case 'openai':
+            if (!apiKey) {
+                console.warn('OpenAI API key missing. Falling back to Mock translation adapter.');
+                return new MockTranslationAdapter();
+            }
             return new OpenAITranslationAdapter(apiKey);
         case 'mock':
         default:

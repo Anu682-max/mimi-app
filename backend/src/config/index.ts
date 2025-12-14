@@ -128,7 +128,7 @@ const regionConfig = loadRegionConfig(currentRegion);
 // Build application configuration
 export const config: AppConfig = {
     env: getEnv('NODE_ENV', 'development'),
-    port: getEnvNumber('PORT', 3000),
+    port: getEnvNumber('PORT', 3699),
     apiVersion: getEnv('API_VERSION', 'v1'),
     region: currentRegion,
     defaultLocale: regionConfig?.defaultLocale || getEnv('DEFAULT_LOCALE', 'en'),

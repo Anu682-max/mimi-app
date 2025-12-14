@@ -99,7 +99,7 @@ async function start() {
         logger.info('Translations preloaded');
 
         // Connect to MongoDB (optional for local testing)
-        const useMockDb = process.env.USE_MOCK_DB === 'true';
+        const useMockDb = true; // Force mock DB for local development without MongoDB
 
         if (!useMockDb && config.database.uri) {
             try {

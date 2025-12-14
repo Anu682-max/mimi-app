@@ -17,12 +17,14 @@ interface AuthContextType {
     isLoading: boolean;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (email: string, password: string, firstName: string, birthday: string, gender: string, lastName?: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3699';
+console.log('AuthContext configured with API_URL:', API_URL);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -51,16 +53,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 body: JSON.stringify({ email, password }),
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get("content-type");
+            let data;
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.error("Non-JSON response:", text);
+                return { success: false, error: "Server error: Received non-JSON response" };
+            }
 
-            if (data.success) {
+            if (response.ok) {
                 setUser(data.user);
                 setToken(data.token);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 return { success: true };
             } else {
-                return { success: false, error: data.error || 'Login failed' };
+                const errorMessage = typeof data.error === 'string'
+                    ? data.error
+                    : (data.error?.message || data.message || 'Login failed');
+                return { success: false, error: errorMessage };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error' };
+        }
+    };
+
+    const signup = async (email: string, password: string, firstName: string, birthday: string, gender: string, lastName?: string) => {
+        try {
+            console.log("Signup attempting fetch to:", `${API_URL}/api/v1/auth/register`);
+            const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, firstName, lastName, birthday, gender }),
+            });
+            console.log("Signup response status:", response.status);
+
+            const contentType = response.headers.get("content-type");
+            let data;
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.error("Non-JSON response:", text);
+                return { success: false, error: "Server error: Received non-JSON response" };
+            }
+
+            if (response.ok) {
+                setUser(data.user);
+                setToken(data.token);
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                return { success: true };
+            } else {
+                const errorMessage = typeof data.error === 'string'
+                    ? data.error
+                    : (data.error?.message || data.message || 'Signup failed');
+                return { success: false, error: errorMessage };
             }
         } catch (error) {
             return { success: false, error: 'Network error' };
@@ -82,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 isAuthenticated: !!user,
                 login,
+                signup,
                 logout,
             }}
         >

@@ -426,6 +426,195 @@ app.put(`${apiPrefix}/profile`, async (req: Request, res: Response): Promise<voi
     }
 });
 
+// Conversation Schema
+const conversationSchema = new mongoose.Schema({
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    lastMessage: { type: String },
+    lastMessageAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
+});
+
+const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);
+
+// Message Schema
+const messageSchema = new mongoose.Schema({
+    conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
+    senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    content: { type: String, required: true },
+    translatedContent: { type: String },
+    originalLocale: { type: String },
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+});
+
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+
+// Chat API - Get conversations
+app.get(`${apiPrefix}/conversations`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const conversations = await Conversation.find({
+            participants: decoded.userId
+        })
+            .populate('participants', 'firstName lastName')
+            .sort({ lastMessageAt: -1 })
+            .lean();
+
+        res.json({
+            success: true,
+            conversations: conversations.map((c: any) => ({
+                id: c._id,
+                participants: c.participants.map((p: any) => ({
+                    id: p._id,
+                    firstName: p.firstName,
+                    lastName: p.lastName,
+                })),
+                lastMessage: c.lastMessage,
+                lastMessageAt: c.lastMessageAt,
+            })),
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+});
+
+// Chat API - Get messages for a conversation
+app.get(`${apiPrefix}/messages/:conversationId`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { conversationId } = req.params;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        jwt.verify(token, jwtSecret);
+
+        const messages = await Message.find({ conversationId })
+            .populate('senderId', 'firstName lastName')
+            .sort({ createdAt: 1 })
+            .lean();
+
+        res.json({
+            success: true,
+            messages: messages.map((m: any) => ({
+                id: m._id,
+                senderId: m.senderId._id,
+                senderName: m.senderId.firstName,
+                content: m.content,
+                translatedContent: m.translatedContent,
+                originalLocale: m.originalLocale,
+                createdAt: m.createdAt,
+            })),
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+});
+
+// Chat API - Send message
+app.post(`${apiPrefix}/messages`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { conversationId, receiverId, content } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!content) {
+        res.status(400).json({ success: false, error: 'Content required' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const sender = await User.findById(decoded.userId).lean() as any;
+
+        let conversation;
+
+        if (conversationId) {
+            conversation = await Conversation.findById(conversationId);
+        } else if (receiverId) {
+            // Find or create conversation
+            conversation = await Conversation.findOne({
+                participants: { $all: [decoded.userId, receiverId] }
+            });
+
+            if (!conversation) {
+                conversation = new Conversation({
+                    participants: [decoded.userId, receiverId],
+                });
+                await conversation.save();
+            }
+        } else {
+            res.status(400).json({ success: false, error: 'conversationId or receiverId required' });
+            return;
+        }
+
+        // Create message
+        const message = new Message({
+            conversationId: conversation._id,
+            senderId: decoded.userId,
+            content,
+            originalLocale: sender?.locale || 'en',
+        });
+
+        await message.save();
+
+        // Update conversation
+        conversation.lastMessage = content.substring(0, 100);
+        conversation.lastMessageAt = new Date();
+        await conversation.save();
+
+        res.json({
+            success: true,
+            message: {
+                id: message._id,
+                conversationId: conversation._id,
+                content: message.content,
+                createdAt: message.createdAt,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to send message' });
+    }
+});
+
 // 404 handler
 app.use((req: Request, res: Response): void => {
     res.status(404).json({

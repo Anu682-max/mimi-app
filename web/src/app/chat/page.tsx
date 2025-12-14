@@ -1,129 +1,268 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Conversation {
+    id: string;
+    participants: { id: string; firstName: string; lastName?: string }[];
+    lastMessage?: string;
+    lastMessageAt?: string;
+}
 
 interface Message {
     id: string;
-    text: string;
-    translatedText?: string;
-    sourceLocale: string;
-    isOwn: boolean;
-    time: string;
-    showTranslation: boolean;
+    senderId: string;
+    senderName: string;
+    content: string;
+    translatedContent?: string;
+    originalLocale?: string;
+    createdAt: string;
 }
 
-const MOCK_MESSAGES: Message[] = [
-    { id: '1', text: 'こんにちは！元気ですか？', translatedText: 'Hello! How are you?', sourceLocale: 'ja', isOwn: false, time: '10:30', showTranslation: true },
-    { id: '2', text: "I'm doing great, thanks for asking!", sourceLocale: 'en', isOwn: true, time: '10:31', showTranslation: false },
-    { id: '3', text: '今週末、どこか行きませんか？', translatedText: 'Would you like to go somewhere this weekend?', sourceLocale: 'ja', isOwn: false, time: '10:32', showTranslation: true },
-    { id: '4', text: 'That sounds fun! What did you have in mind?', sourceLocale: 'en', isOwn: true, time: '10:33', showTranslation: false },
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function ChatPage() {
-    const { t, i18n } = useTranslation();
-    const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
-    const [inputText, setInputText] = useState('');
+    const { t } = useTranslation();
+    const router = useRouter();
+    const { user, token, isAuthenticated, isLoading: authLoading } = useAuth();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const toggleTranslation = (id: string) => {
-        setMessages(messages.map(msg =>
-            msg.id === id ? { ...msg, showTranslation: !msg.showTranslation } : msg
-        ));
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [showTranslated, setShowTranslated] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+        }
+    }, [authLoading, isAuthenticated, router]);
+
+    useEffect(() => {
+        if (token) {
+            fetchConversations();
+        }
+    }, [token]);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const fetchConversations = async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/conversations`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await response.json();
+            if (data.success) {
+                setConversations(data.conversations);
+            }
+        } catch (error) {
+            console.error('Failed to fetch conversations:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const sendMessage = () => {
-        if (!inputText.trim()) return;
-
-        const newMessage: Message = {
-            id: String(Date.now()),
-            text: inputText,
-            sourceLocale: i18n.language,
-            isOwn: true,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            showTranslation: false,
-        };
-
-        setMessages([...messages, newMessage]);
-        setInputText('');
+    const fetchMessages = async (conversationId: string) => {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/messages/${conversationId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await response.json();
+            if (data.success) {
+                setMessages(data.messages);
+            }
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+        }
     };
+
+    const sendMessage = async () => {
+        if (!newMessage.trim() || !selectedConversation) return;
+
+        try {
+            const response = await fetch(`${API_URL}/api/v1/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    conversationId: selectedConversation.id,
+                    content: newMessage,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setMessages([...messages, {
+                    id: data.message.id,
+                    senderId: user?.id || '',
+                    senderName: user?.firstName || '',
+                    content: data.message.content,
+                    createdAt: data.message.createdAt,
+                }]);
+                setNewMessage('');
+                fetchConversations(); // Refresh conversation list
+            }
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        }
+    };
+
+    const selectConversation = (conv: Conversation) => {
+        setSelectedConversation(conv);
+        fetchMessages(conv.id);
+    };
+
+    const toggleTranslation = (msgId: string) => {
+        setShowTranslated(prev => ({
+            ...prev,
+            [msgId]: !prev[msgId],
+        }));
+    };
+
+    const getOtherParticipant = (conv: Conversation) => {
+        return conv.participants.find(p => p.id !== user?.id) || conv.participants[0];
+    };
+
+    if (authLoading || isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            </div>
+        );
+    }
 
     return (
         <main className="h-screen flex flex-col">
             {/* Header */}
-            <header className="p-4 border-b border-gray-800 flex items-center gap-3">
-                <Link href="/" className="text-gray-400 hover:text-white">
+            <header className="p-4 border-b border-gray-800 flex items-center gap-4">
+                <Link href="/dashboard" className="text-gray-400 hover:text-white">
                     ←
                 </Link>
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full"></div>
-                <div>
-                    <h1 className="font-semibold">Yuki</h1>
-                    <p className="text-sm text-green-400">{t('chat.typing')}</p>
-                </div>
+                <h1 className="text-xl font-bold flex-1">
+                    {selectedConversation
+                        ? getOtherParticipant(selectedConversation).firstName
+                        : t('chat.title')
+                    }
+                </h1>
+                {selectedConversation && (
+                    <button
+                        onClick={() => setSelectedConversation(null)}
+                        className="text-sm text-gray-400 hover:text-white"
+                    >
+                        {t('common.back')}
+                    </button>
+                )}
             </header>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
-                    <div className="text-center text-gray-500 mt-20">
-                        <p className="text-lg">{t('chat.no_messages')}</p>
+            {/* Content */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Conversation List */}
+                {!selectedConversation && (
+                    <div className="flex-1 overflow-y-auto">
+                        {conversations.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                                <div className="text-5xl mb-4">💬</div>
+                                <h2 className="text-xl font-bold mb-2">No conversations yet</h2>
+                                <p className="text-gray-400 mb-4">Match with someone to start chatting!</p>
+                                <Link
+                                    href="/discover"
+                                    className="px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl font-semibold"
+                                >
+                                    {t('discover.title')}
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-gray-800">
+                                {conversations.map((conv) => {
+                                    const other = getOtherParticipant(conv);
+                                    return (
+                                        <button
+                                            key={conv.id}
+                                            onClick={() => selectConversation(conv)}
+                                            className="w-full p-4 flex items-center gap-3 hover:bg-gray-800/50 transition text-left"
+                                        >
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-xl">
+                                                {other.firstName[0]}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold">{other.firstName} {other.lastName}</p>
+                                                <p className="text-gray-400 text-sm truncate">{conv.lastMessage || 'No messages'}</p>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    messages.map((msg) => (
-                        <div key={msg.id} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
-                            <div
-                                className={`max-w-[80%] rounded-2xl p-4 ${msg.isOwn
-                                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 rounded-br-md'
-                                        : 'bg-[#1A1A24] rounded-bl-md'
-                                    }`}
-                            >
-                                <p className="text-white">
-                                    {msg.translatedText && msg.showTranslation
-                                        ? msg.translatedText
-                                        : msg.text
-                                    }
-                                </p>
+                )}
 
-                                {/* Translation toggle */}
-                                {msg.translatedText && (
-                                    <button
-                                        onClick={() => toggleTranslation(msg.id)}
-                                        className="mt-2 text-xs opacity-70 hover:opacity-100 block border-t border-white/20 pt-2"
-                                    >
-                                        {msg.showTranslation
-                                            ? t('chat.show_original')
-                                            : t('chat.translated_from', { language: msg.sourceLocale.toUpperCase() })
-                                        }
-                                    </button>
-                                )}
+                {/* Messages */}
+                {selectedConversation && (
+                    <div className="flex-1 flex flex-col">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {messages.map((msg) => {
+                                const isOwn = msg.senderId === user?.id;
+                                const showingTranslated = showTranslated[msg.id] && msg.translatedContent;
 
-                                <p className={`text-xs mt-1 ${msg.isOwn ? 'text-white/70' : 'text-gray-500'}`}>
-                                    {msg.time}
-                                </p>
+                                return (
+                                    <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[80%] ${isOwn ? 'order-2' : ''}`}>
+                                            <div className={`p-3 rounded-2xl ${isOwn
+                                                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 rounded-br-sm'
+                                                    : 'bg-[#1A1A24] rounded-bl-sm'
+                                                }`}>
+                                                <p>{showingTranslated ? msg.translatedContent : msg.content}</p>
+                                            </div>
+                                            {msg.originalLocale && msg.originalLocale !== user?.locale && (
+                                                <button
+                                                    onClick={() => toggleTranslation(msg.id)}
+                                                    className="text-xs text-gray-500 mt-1 hover:text-gray-300"
+                                                >
+                                                    {showingTranslated
+                                                        ? t('chat.show_original')
+                                                        : `${t('chat.translate_from')} ${msg.originalLocale.toUpperCase()}`
+                                                    }
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Message Input */}
+                        <div className="p-4 border-t border-gray-800">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                    placeholder={t('chat.type_message')}
+                                    className="flex-1 p-3 bg-[#1A1A24] rounded-xl border border-gray-700 focus:border-pink-500 focus:outline-none"
+                                />
+                                <button
+                                    onClick={sendMessage}
+                                    disabled={!newMessage.trim()}
+                                    className="px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl hover:opacity-90 disabled:opacity-50"
+                                >
+                                    ➤
+                                </button>
                             </div>
                         </div>
-                    ))
+                    </div>
                 )}
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-800">
-                <div className="flex gap-3">
-                    <input
-                        type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        placeholder={t('chat.type_message')}
-                        className="flex-1 p-4 bg-[#1A1A24] rounded-full border border-gray-700 focus:border-pink-500 focus:outline-none"
-                    />
-                    <button
-                        onClick={sendMessage}
-                        className="px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full font-semibold hover:opacity-90 transition"
-                    >
-                        {t('chat.send')}
-                    </button>
-                </div>
             </div>
         </main>
     );

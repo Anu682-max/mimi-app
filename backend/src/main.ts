@@ -33,8 +33,15 @@ const io = new SocketServer(httpServer, {
 });
 
 // Middleware
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

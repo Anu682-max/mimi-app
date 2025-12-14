@@ -340,6 +340,92 @@ app.post(`${apiPrefix}/discover/swipe`, async (req: Request, res: Response): Pro
     });
 });
 
+// Profile API - Get current user profile
+app.get(`${apiPrefix}/profile`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const user = await User.findById(decoded.userId).select('-password').lean();
+
+        if (!user) {
+            res.status(404).json({ success: false, error: 'User not found' });
+            return;
+        }
+
+        res.json({
+            success: true,
+            profile: user,
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+});
+
+// Profile API - Update current user profile
+app.put(`${apiPrefix}/profile`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        const allowedFields = ['firstName', 'lastName', 'bio', 'age', 'gender', 'lookingFor', 'interests', 'occupation', 'city', 'country', 'locale'];
+        const updates: Record<string, any> = {};
+
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        }
+
+        const user = await User.findByIdAndUpdate(
+            decoded.userId,
+            { $set: updates },
+            { new: true }
+        ).select('-password').lean();
+
+        if (!user) {
+            res.status(404).json({ success: false, error: 'User not found' });
+            return;
+        }
+
+        res.json({
+            success: true,
+            message: t('profile.updated', (user as any).locale || 'en'),
+            profile: user,
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+});
+
 // 404 handler
 app.use((req: Request, res: Response): void => {
     res.status(404).json({

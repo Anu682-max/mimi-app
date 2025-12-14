@@ -880,6 +880,190 @@ app.delete(`${apiPrefix}/profile/photos/:index`, async (req: Request, res: Respo
     }
 });
 
+// Push Subscription Schema
+const pushSubscriptionSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    endpoint: { type: String, required: true },
+    keys: {
+        p256dh: { type: String, required: true },
+        auth: { type: String, required: true },
+    },
+    createdAt: { type: Date, default: Date.now },
+});
+
+pushSubscriptionSchema.index({ userId: 1, endpoint: 1 }, { unique: true });
+
+const PushSubscription = mongoose.models.PushSubscription || mongoose.model('PushSubscription', pushSubscriptionSchema);
+
+// Get VAPID public key
+app.get(`${apiPrefix}/notifications/vapid-key`, (_req: Request, res: Response): void => {
+    const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+
+    if (!vapidPublicKey) {
+        res.status(500).json({ success: false, error: 'VAPID not configured' });
+        return;
+    }
+
+    res.json({
+        success: true,
+        publicKey: vapidPublicKey,
+    });
+});
+
+// Subscribe to push notifications
+app.post(`${apiPrefix}/notifications/subscribe`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { subscription } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!subscription || !subscription.endpoint || !subscription.keys) {
+        res.status(400).json({ success: false, error: 'Invalid subscription data' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        // Upsert subscription
+        await PushSubscription.findOneAndUpdate(
+            { userId: decoded.userId, endpoint: subscription.endpoint },
+            {
+                userId: decoded.userId,
+                endpoint: subscription.endpoint,
+                keys: subscription.keys,
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Subscribed to push notifications',
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Subscription failed' });
+    }
+});
+
+// Unsubscribe from push notifications
+app.post(`${apiPrefix}/notifications/unsubscribe`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { endpoint } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        await PushSubscription.deleteOne({ userId: decoded.userId, endpoint });
+
+        res.json({
+            success: true,
+            message: 'Unsubscribed from push notifications',
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Unsubscribe failed' });
+    }
+});
+
+// Send notification to user (internal use)
+app.post(`${apiPrefix}/notifications/send`, async (req: Request, res: Response): Promise<void> => {
+    const { userId, title, body, url } = req.body;
+    const adminKey = req.headers['x-admin-key'];
+
+    // Simple admin key check for internal use
+    if (adminKey !== process.env.ADMIN_API_KEY) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!userId || !title || !body) {
+        res.status(400).json({ success: false, error: 'userId, title, and body required' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const subscriptions = await PushSubscription.find({ userId }).lean();
+
+        if (subscriptions.length === 0) {
+            res.json({ success: true, sent: 0, message: 'No subscriptions found' });
+            return;
+        }
+
+        const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+        const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+        const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@indate.com';
+
+        if (!vapidPublicKey || !vapidPrivateKey) {
+            res.status(500).json({ success: false, error: 'VAPID not configured' });
+            return;
+        }
+
+        // Dynamic import for web-push (ES module compatibility)
+        const webpush = await import('web-push');
+        webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+
+        const payload = JSON.stringify({
+            title,
+            body,
+            url: url || '/dashboard',
+            icon: '/icon-192.png',
+        });
+
+        let sent = 0;
+        for (const sub of subscriptions) {
+            try {
+                await webpush.sendNotification({
+                    endpoint: sub.endpoint,
+                    keys: sub.keys as { p256dh: string; auth: string },
+                }, payload);
+                sent++;
+            } catch (err: any) {
+                // Remove invalid subscription
+                if (err.statusCode === 410 || err.statusCode === 404) {
+                    await PushSubscription.deleteOne({ _id: sub._id });
+                }
+            }
+        }
+
+        res.json({
+            success: true,
+            sent,
+            total: subscriptions.length,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Send failed' });
+    }
+});
+
 // 404 handler
 app.use((req: Request, res: Response): void => {
     res.status(404).json({

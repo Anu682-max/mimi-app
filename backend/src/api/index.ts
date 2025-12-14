@@ -2,7 +2,7 @@
  * Vercel Serverless API Entry Point
  */
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
@@ -24,7 +24,7 @@ interface OpenAIResponse {
 // Preload translations
 preloadTranslations();
 
-const app: express.Express = express();
+const app: Application = express();
 
 // Middleware
 app.use(helmet());

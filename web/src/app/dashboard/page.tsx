@@ -1,16 +1,22 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+    HeartIcon, 
+    ChatBubbleLeftIcon, 
+    PaperAirplaneIcon,
+    EllipsisVerticalIcon,
+    SparklesIcon,
+    MapPinIcon,
+    ChevronRightIcon,
+    PlusIcon
+} from '@heroicons/react/24/solid';
 
 export default function DashboardPage() {
-    const { t } = useTranslation();
     const router = useRouter();
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState('home');
+    const { user, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -20,7 +26,7 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#FFF0F3]">
+            <div className="min-h-screen flex items-center justify-center bg-[#FFF5F7]">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
             </div>
         );
@@ -28,166 +34,139 @@ export default function DashboardPage() {
 
     if (!isAuthenticated) return null;
 
-    const handleLogout = () => {
-        logout();
-        router.push('/');
-    };
-
-    const users = [
-        { id: 1, name: 'Amy Thumann', action: 'requested to chat with you', seed: 'Amy' },
-        { id: 2, name: 'Emma Collins', action: 'requested to chat with you', seed: 'Emma' },
-        { id: 3, name: 'Sophie Miller', action: 'requested to chat with you', seed: 'Sophie' },
+    const latestRequests = [
+        { id: 1, name: 'Amy', age: 24, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Amy', time: '2h ago' },
+        { id: 2, name: 'Sophie', age: 26, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie', time: '5h ago' },
+        { id: 3, name: 'Emma', age: 23, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', time: '1d ago' },
     ];
 
     return (
-        <main className="min-h-screen bg-[#FFF0F3] pb-24 text-gray-900 font-sans">
-            {/* Header */}
-            <header className="px-6 py-6 flex justify-between items-center">
-                {/* Filter / Menu Button */}
-                <button
-                    onClick={handleLogout}
-                    className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-800 hover:bg-gray-50 transition"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
+        <main className="min-h-screen bg-gradient-to-br from-[#FFF5F7] via-[#FFF0F3] to-[#FFE8ED] pb-24">
+            {/* Floating Decorative Elements */}
+            <div className="absolute top-20 right-10 w-32 h-32 bg-pink-300/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-40 left-10 w-40 h-40 bg-rose-300/20 rounded-full blur-3xl animate-pulse delay-700"></div>
+            
+            <header className="px-6 py-5 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-pink-100/50 sticky top-0 z-50">
+                <button className="w-11 h-11 bg-gradient-to-br from-white to-pink-50 rounded-2xl shadow-lg flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all active:scale-95 group">
+                    <EllipsisVerticalIcon className="w-5 h-5 text-gray-600 group-hover:text-pink-500 transition-colors" />
                 </button>
-
-                {/* Location */}
-                <div className="flex items-center gap-2 text-[#FB6F92] font-semibold text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="opacity-90"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
-                    <span>Los Angeles</span>
-                </div>
-
-                {/* User Profile */}
-                <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-sm bg-pink-100 relative">
-                    <Image
+                <button className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all active:scale-95">
+                    <MapPinIcon className="w-4 h-4 text-white" />
+                    <span className="text-sm font-bold text-white">Los Angeles</span>
+                </button>
+                <button 
+                    onClick={() => router.push('/profile')}
+                    className="w-11 h-11 rounded-full overflow-hidden border-3 border-pink-400 shadow-lg hover:scale-110 hover:border-pink-500 transition-all active:scale-95 ring-2 ring-pink-200/50"
+                >
+                    <img 
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName || 'User'}`}
                         alt="Profile"
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                     />
-                </div>
+                </button>
             </header>
-
-            <div className="px-6 space-y-8">
-                {/* Premium Banner */}
-                <div className="relative bg-[#F47895] rounded-[35px] p-8 text-white shadow-xl shadow-pink-200 overflow-hidden">
-                    {/* Decorative Hearts */}
-                    <div className="absolute top-4 left-4 text-4xl opacity-90 animate-bounce delay-700">❤️</div>
-                    <div className="absolute top-8 right-6 text-4xl opacity-90 animate-bounce">💖</div>
-
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <h2 className="text-3xl font-serif font-italic mb-1 opacity-95" style={{ fontFamily: 'Times New Roman, serif', fontStyle: 'italic' }}>LoveStory Premium</h2>
-                        <h3 className="text-lg font-medium mb-6 opacity-95">Get LoveStory Premium</h3>
-
-                        <button className="bg-white text-[#F47895] px-8 py-3 rounded-full font-bold text-lg shadow-md hover:scale-105 transition-transform">
+            <div className="mx-6 mt-8 relative overflow-hidden animate-fade-in">
+                <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 rounded-[28px] p-8 shadow-2xl relative overflow-hidden group hover:shadow-pink-500/50 transition-all duration-500">
+                    {/* Animated Background Shapes */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.15)_0%,_transparent_50%)]" />
+                    <HeartIcon className="absolute top-4 left-4 w-10 h-10 text-white/20 animate-pulse" />
+                    <SparklesIcon className="absolute top-6 right-6 w-10 h-10 text-yellow-200/60 animate-bounce" />
+                    <HeartIcon className="absolute bottom-6 right-10 w-8 h-8 text-white/30 animate-pulse delay-300" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+                    
+                    <div className="relative z-10 text-center">
+                        <div className="inline-block mb-3">
+                            <div className="px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+                                <span className="text-xs font-semibold text-white tracking-wider uppercase">Special Offer</span>
+                            </div>
+                        </div>
+                        <h2 className="text-4xl font-black text-white mb-3 tracking-tight">LoveStory Premium</h2>
+                        <p className="text-white/95 text-base mb-7 font-medium">Unlock unlimited matches & features</p>
+                        <button className="px-10 py-4 bg-white text-pink-600 font-bold rounded-full shadow-2xl hover:shadow-white/50 hover:scale-105 active:scale-95 transition-all duration-300 text-lg group-hover:bg-gradient-to-r group-hover:from-yellow-300 group-hover:to-white">
                             Get for $10.99
                         </button>
                     </div>
                 </div>
-
-                {/* Quick Actions Grid */}
-                <div className="grid grid-cols-2 gap-5">
-                    {/* Messages */}
-                    <div className="bg-white p-6 rounded-[30px] border-2 border-dashed border-pink-200 flex flex-col justify-between h-40 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="flex justify-between items-start">
-                            <div className="w-12 h-12 bg-[#FFEBEE] rounded-full flex items-center justify-center text-[#FB6F92]">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" /></svg>
-                            </div>
-                            <div className="text-gray-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" /></svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-800">Messages</h3>
-                            <p className="text-sm text-gray-500 font-medium">24 unread</p>
-                        </div>
-                    </div>
-
-                    {/* Requests */}
-                    <div className="bg-white p-6 rounded-[30px] border-2 border-dashed border-pink-200 flex flex-col justify-between h-40 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="flex justify-between items-start">
-                            <div className="w-12 h-12 bg-[#FFEBEE] rounded-full flex items-center justify-center text-[#FB6F92]">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="m2 21 21-9L2 3v7l15 2-15 2v7z" /></svg>
-                            </div>
-                            <div className="text-gray-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" /></svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-800">Requests</h3>
-                            <p className="text-sm text-gray-500 font-medium">99 new</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Latest Requests List */}
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold text-gray-900">Latest Requests</h2>
-                        <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        {users.map((user) => (
-                            <div key={user.id} className="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm">
-                                <div className="w-16 h-16 rounded-full overflow-hidden relative bg-gray-100 flex-shrink-0">
-                                    <Image
-                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.seed}`}
-                                        alt={user.name}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-lg text-gray-900 truncate">{user.name}</h4>
-                                    <p className="text-sm text-gray-500 truncate">{user.action}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button className="bg-[#FB6F92] hover:bg-[#ff5c86] text-white px-5 py-2 rounded-xl font-semibold text-sm transition-colors shadow-sm shadow-pink-200">
-                                        Accept
-                                    </button>
-                                    <button className="border-2 border-[#ffc4d3] text-[#FB6F92] hover:bg-pink-50 px-5 py-2 rounded-xl font-semibold text-sm transition-colors">
-                                        Decline
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </div>
-
-            {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-8 py-4 flex justify-between items-center z-50 rounded-t-[30px] shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-                <button
-                    onClick={() => setActiveTab('home')}
-                    className={`flex flex-col items-center gap-1 ${activeTab === 'home' ? 'text-[#FB6F92]' : 'text-gray-400'}`}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={activeTab === 'home' ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            <div className="px-6 mt-8 grid grid-cols-2 gap-5 animate-fade-in">
+                <button onClick={() => router.push('/chat')} className="bg-white/80 backdrop-blur-xl rounded-[24px] p-7 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group relative border border-pink-100/50 active:scale-95">
+                    <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-2 h-2 bg-pink-500 rounded-full animate-ping absolute" />
+                        <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                    </div>
+                    <div className="mb-5">
+                        <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-500 rounded-[18px] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <ChatBubbleLeftIcon className="w-7 h-7 text-white" />
+                        </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Messages</h3>
+                    <div className="flex items-center space-x-2">
+                        <div className="px-2.5 py-0.5 bg-pink-100 rounded-full">
+                            <span className="text-sm font-bold text-pink-600">24</span>
+                        </div>
+                        <p className="text-sm text-gray-500 font-medium">unread</p>
+                    </div>
                 </button>
-                <button
-                    onClick={() => setActiveTab('matches')}
-                    className={`flex flex-col items-center gap-1 ${activeTab === 'matches' ? 'text-[#FB6F92]' : 'text-gray-400'}`}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={activeTab === 'matches' ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
-                </button>
-                <div className="w-14 h-14 bg-[#FB6F92] rounded-full flex items-center justify-center -mt-8 shadow-lg shadow-pink-300 text-white cursor-pointer hover:scale-105 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                </div>
-                <button
-                    onClick={() => setActiveTab('chat')}
-                    className={`flex flex-col items-center gap-1 ${activeTab === 'chat' ? 'text-[#FB6F92]' : 'text-gray-400'}`}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={activeTab === 'chat' ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
-                </button>
-                <button
-                    onClick={() => setActiveTab('profile')}
-                    className={`flex flex-col items-center gap-1 ${activeTab === 'profile' ? 'text-[#FB6F92]' : 'text-gray-400'}`}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill={activeTab === 'profile' ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <button onClick={() => router.push('/matches')} className="bg-white/80 backdrop-blur-xl rounded-[24px] p-7 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group relative border border-pink-100/50 active:scale-95">
+                    <div className="absolute top-5 right-5">
+                        <PaperAirplaneIcon className="w-5 h-5 text-pink-500 group-hover:scale-110 group-hover:rotate-12 transition-transform" />
+                    </div>
+                    <div className="mb-5">
+                        <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-pink-600 rounded-[18px] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <HeartIcon className="w-7 h-7 text-white group-hover:animate-pulse" />
+                        </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Requests</h3>
+                    <div className="flex items-center space-x-2">
+                        <div className="px-2.5 py-0.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full animate-pulse">
+                            <span className="text-sm font-bold text-white">99</span>
+                        </div>
+                        <p className="text-sm text-pink-600 font-bold">new</p>
+                    </div>
                 </button>
             </div>
+            <div className="px-6 mt-10 animate-fade-in-up">
+                <div className="flex justify-between items-center mb-5">
+                    <div>
+                        <h3 className="text-2xl font-black text-gray-900 mb-1">Latest Requests</h3>
+                        <p className="text-sm text-gray-500">People who liked you</p>
+                    </div>
+                    <button onClick={() => router.push('/matches')} className="w-10 h-10 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center hover:scale-110 hover:shadow-lg transition-all active:scale-95 group">
+                        <ChevronRightIcon className="w-5 h-5 text-pink-600 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                </div>
+                <div className="space-y-4">
+                    {latestRequests.map((request, index) => (
+                        <div key={request.id} className="bg-white/90 backdrop-blur-xl rounded-[22px] p-5 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-between border border-pink-50 group" style={{animationDelay: `${index * 100}ms`}}>
+                            <div className="flex items-center space-x-4">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full animate-pulse opacity-30 blur" />
+                                    <img src={request.avatar} alt={request.name} className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-lg relative z-10" />
+                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center border-2 border-white shadow-lg animate-bounce z-20">
+                                        <HeartIcon className="w-3.5 h-3.5 text-white" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-gray-900 text-lg group-hover:text-pink-600 transition-colors">{request.name}, {request.age}</h4>
+                                    <p className="text-sm text-gray-500 font-medium">{request.time}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center hover:scale-110 hover:from-pink-100 hover:to-rose-100 transition-all active:scale-95 group/btn">
+                                    <HeartIcon className="w-6 h-6 text-gray-400 group-hover/btn:text-pink-500 transition-colors" />
+                                </button>
+                                <button className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center hover:scale-110 hover:shadow-lg hover:shadow-pink-500/50 transition-all active:scale-95">
+                                    <ChatBubbleLeftIcon className="w-5 h-5 text-white" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <button onClick={() => router.push('/discover')} className="fixed bottom-24 right-6 w-16 h-16 bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 hover:shadow-pink-500/50 transition-all duration-300 z-40 active:scale-95 animate-bounce-slow group">
+                <div className="absolute inset-0 bg-white/20 rounded-full animate-ping" />
+                <PlusIcon className="w-8 h-8 text-white relative z-10 group-hover:rotate-90 transition-transform duration-300" />
+            </button>
         </main>
     );
 }

@@ -35,7 +35,7 @@ export default function ChatPage() {
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState('');
-    const [viewingAvatar, setViewingAvatar] = useState<{src: string; name: string} | null>(null);
+    const [viewingAvatar, setViewingAvatar] = useState<{ src: string; name: string } | null>(null);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -50,15 +50,15 @@ export default function ChatPage() {
             const mockConversations: Conversation[] = matches.map(match => ({
                 id: `conv-${match.id}`,
                 matchId: match.id,
-                matchName: match.name,
-                matchPhoto: match.photo,
+                matchName: `${match.firstName} ${match.lastName}`,
+                matchPhoto: match.photos[0],
                 lastMessage: 'Hey! How are you?',
                 lastMessageAt: new Date().toISOString(),
                 messages: [
                     {
                         id: '1',
                         senderId: match.id,
-                        senderName: match.name,
+                        senderName: `${match.firstName} ${match.lastName}`,
                         content: `Hi ${user.firstName}! Nice to match with you! 👋`,
                         createdAt: new Date(Date.now() - 3600000).toISOString(),
                     },
@@ -91,7 +91,7 @@ export default function ChatPage() {
         };
 
         // Update conversation with new message
-        setConversations(conversations.map(conv => 
+        setConversations(conversations.map(conv =>
             conv.id === selectedConversation.id
                 ? {
                     ...conv,
@@ -210,11 +210,10 @@ export default function ChatPage() {
                                 <button
                                     key={conv.id}
                                     onClick={() => selectConversation(conv)}
-                                    className={`w-full p-4 rounded-xl flex items-center space-x-3 transition-all ${
-                                        selectedConversation?.id === conv.id
+                                    className={`w-full p-4 rounded-xl flex items-center space-x-3 transition-all ${selectedConversation?.id === conv.id
                                             ? 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30'
                                             : 'hover:bg-white/5'
-                                    }`}
+                                        }`}
                                 >
                                     <div className="relative">
                                         <img
@@ -222,7 +221,7 @@ export default function ChatPage() {
                                             alt={conv.matchName}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setViewingAvatar({src: conv.matchPhoto, name: conv.matchName});
+                                                setViewingAvatar({ src: conv.matchPhoto, name: conv.matchName });
                                             }}
                                             className="w-14 h-14 rounded-full object-cover border-2 border-pink-500/50 cursor-pointer hover:border-pink-400 transition-colors"
                                         />
@@ -250,7 +249,7 @@ export default function ChatPage() {
                             <img
                                 src={selectedConversation.matchPhoto}
                                 alt={selectedConversation.matchName}
-                                onClick={() => setViewingAvatar({src: selectedConversation.matchPhoto, name: selectedConversation.matchName})}
+                                onClick={() => setViewingAvatar({ src: selectedConversation.matchPhoto, name: selectedConversation.matchName })}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-pink-500/50 cursor-pointer hover:border-pink-400 transition-colors"
                             />
                             <div className="flex-1">
@@ -271,15 +270,14 @@ export default function ChatPage() {
                                 return (
                                     <div
                                         key={message.id}
-                                        className={`flex group items-end space-x-2 ${
-                                            isOwnMessage ? 'justify-end' : 'justify-start'
-                                        }`}
+                                        className={`flex group items-end space-x-2 ${isOwnMessage ? 'justify-end' : 'justify-start'
+                                            }`}
                                     >
                                         {!isOwnMessage && (
                                             <img
                                                 src={selectedConversation.matchPhoto}
                                                 alt={selectedConversation.matchName}
-                                                onClick={() => setViewingAvatar({src: selectedConversation.matchPhoto, name: selectedConversation.matchName})}
+                                                onClick={() => setViewingAvatar({ src: selectedConversation.matchPhoto, name: selectedConversation.matchName })}
                                                 className="w-8 h-8 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-pink-400 transition-all"
                                             />
                                         )}
@@ -319,11 +317,10 @@ export default function ChatPage() {
                                                     </div>
                                                 ) : (
                                                     <div
-                                                        className={`rounded-2xl px-4 py-3 shadow-lg ${
-                                                            isOwnMessage
+                                                        className={`rounded-2xl px-4 py-3 shadow-lg ${isOwnMessage
                                                                 ? 'bg-gradient-to-r from-pink-500 to-purple-500'
                                                                 : 'bg-white/10 backdrop-blur-sm'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <p className="text-white break-words">{message.content}</p>
                                                         <p className={`text-xs mt-1 flex items-center space-x-1 ${isOwnMessage ? 'text-white/70' : 'text-gray-400'}`}>
@@ -361,7 +358,7 @@ export default function ChatPage() {
                                             <img
                                                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName}`}
                                                 alt="You"
-                                                onClick={() => setViewingAvatar({src: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName}`, name: 'You'})}
+                                                onClick={() => setViewingAvatar({ src: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName}`, name: 'You' })}
                                                 className="w-8 h-8 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-purple-400 transition-all"
                                             />
                                         )}

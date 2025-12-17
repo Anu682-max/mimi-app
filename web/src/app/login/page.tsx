@@ -14,6 +14,7 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export default function LoginPage() {
         setError('');
         setIsLoading(true);
 
-        const result = await login(email, password);
+        const result = await login(email, password, rememberMe);
 
         if (result.success) {
             router.push('/dashboard');
@@ -120,10 +121,21 @@ export default function LoginPage() {
                             </button>
                         </div>
 
-                        <div className="text-right">
-                            <button type="button" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    className="w-4 h-4 rounded border-white/20 bg-black/20 text-violet-600 focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-0 cursor-pointer transition-all"
+                                />
+                                <span className="ml-2 text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                                    Remember me
+                                </span>
+                            </label>
+                            <Link href="/forgot-password" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors">
                                 {t('auth.forgot_password')}
-                            </button>
+                            </Link>
                         </div>
 
                         <button

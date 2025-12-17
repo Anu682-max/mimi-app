@@ -33,8 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check for existing token on mount
     useEffect(() => {
-        const savedToken = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
+        // Check localStorage first (remember me)
+        let savedToken = localStorage.getItem('token');
+        let savedUser = localStorage.getItem('user');
+        
+        // If not in localStorage, check sessionStorage
+        if (!savedToken) {
+            savedToken = sessionStorage.getItem('token');
+            savedUser = sessionStorage.getItem('user');
+        }
 
         if (savedToken && savedUser) {
             setToken(savedToken);
@@ -43,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
     }, []);
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, rememberMe: boolean = false) => {
         try {
             const response = await fetch(`${API_URL}/api/v1/auth/login`, {
                 method: 'POST',
@@ -66,8 +73,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (response.ok) {
                 setUser(data.user);
                 setToken(data.token);
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                if (rememberMe) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('rememberMe', 'true');
+                } else {
+                    sessionStorage.setItem('token', data.token);
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                }
+                
                 return { success: true };
             } else {
                 const errorMessage = typeof data.error === 'string'
@@ -125,6 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('rememberMe');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
     };
 
     return (

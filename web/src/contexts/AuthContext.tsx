@@ -16,7 +16,7 @@ interface AuthContextType {
     token: string | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
     signup: (email: string, password: string, firstName: string, birthday: string, gender: string, lastName?: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
 }
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check localStorage first (remember me)
         let savedToken = localStorage.getItem('token');
         let savedUser = localStorage.getItem('user');
-        
+
         // If not in localStorage, check sessionStorage
         if (!savedToken) {
             savedToken = sessionStorage.getItem('token');
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (response.ok) {
                 setUser(data.user);
                 setToken(data.token);
-                
+
                 if (rememberMe) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('user', JSON.stringify(data.user));
                 }
-                
+
                 return { success: true };
             } else {
                 const errorMessage = typeof data.error === 'string'

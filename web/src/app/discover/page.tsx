@@ -94,16 +94,42 @@ export default function DiscoverPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Animated Background Elements */}
-            <div className="absolute top-10 left-10 w-64 h-64 bg-pink-300/30 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-300/30 rounded-full blur-3xl animate-pulse delay-700" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-300/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* 3D Glass Bubbles Background */}
+            <div className="absolute top-20 right-20 w-80 h-80 rounded-full bg-gradient-to-br from-pink-300/40 via-purple-300/30 to-transparent backdrop-blur-3xl shadow-2xl animate-float" 
+                 style={{
+                     boxShadow: 'inset 0 -80px 120px rgba(255, 255, 255, 0.3), 0 30px 60px rgba(219, 39, 119, 0.2)'
+                 }} 
+            />
+            <div className="absolute bottom-32 left-16 w-64 h-64 rounded-full bg-gradient-to-br from-purple-400/40 via-pink-300/30 to-transparent backdrop-blur-3xl shadow-2xl animate-float-delayed" 
+                 style={{
+                     boxShadow: 'inset 0 -60px 100px rgba(255, 255, 255, 0.4), 0 25px 50px rgba(168, 85, 247, 0.2)'
+                 }} 
+            />
+            <div className="absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-gradient-to-br from-rose-300/40 via-pink-300/30 to-transparent backdrop-blur-2xl shadow-xl animate-pulse" 
+                 style={{
+                     boxShadow: 'inset 0 -40px 80px rgba(255, 255, 255, 0.35), 0 20px 40px rgba(244, 63, 94, 0.15)'
+                 }} 
+            />
+            <div className="absolute bottom-1/4 right-1/3 w-56 h-56 rounded-full bg-gradient-to-br from-blue-300/30 via-purple-300/30 to-transparent backdrop-blur-3xl shadow-2xl" 
+                 style={{
+                     boxShadow: 'inset 0 -50px 90px rgba(255, 255, 255, 0.3), 0 22px 45px rgba(147, 197, 253, 0.18)',
+                     animation: 'float 8s ease-in-out infinite'
+                 }} 
+            />
             
-            {/* Floating Hearts */}
-            <HeartIcon className="absolute top-20 right-20 w-8 h-8 text-pink-300/40 animate-float" />
-            <HeartIcon className="absolute bottom-32 left-16 w-6 h-6 text-rose-300/40 animate-float-delayed" />
-            <SparklesIcon className="absolute top-1/3 right-1/4 w-10 h-10 text-purple-300/40 animate-bounce" />
+            {/* Smaller Floating Bubbles */}
+            <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-full bg-gradient-to-br from-pink-200/50 to-transparent backdrop-blur-xl shadow-lg animate-bounce" 
+                 style={{
+                     boxShadow: 'inset 0 -30px 60px rgba(255, 255, 255, 0.4), 0 15px 30px rgba(251, 207, 232, 0.2)'
+                 }} 
+            />
+            <div className="absolute bottom-40 right-20 w-40 h-40 rounded-full bg-gradient-to-br from-purple-200/40 to-transparent backdrop-blur-xl shadow-lg" 
+                 style={{
+                     boxShadow: 'inset 0 -35px 70px rgba(255, 255, 255, 0.35), 0 18px 35px rgba(233, 213, 255, 0.2)',
+                     animation: 'float-delayed 7s ease-in-out infinite'
+                 }} 
+            />
             
             {/* Back Button */}
             <button
@@ -111,6 +137,14 @@ export default function DiscoverPage() {
                 className="absolute top-6 left-6 w-12 h-12 bg-white/90 backdrop-blur-xl rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-xl z-50 border border-pink-100 group active:scale-95"
             >
                 <ArrowLeftIcon className="w-5 h-5 text-gray-800 group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+
+            {/* Browse Profiles Button */}
+            <button
+                onClick={() => router.push('/browse')}
+                className="absolute top-6 right-24 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all z-50 active:scale-95 text-sm"
+            >
+                🔍 Browse Profiles
             </button>
 
             {/* Progress Indicator */}

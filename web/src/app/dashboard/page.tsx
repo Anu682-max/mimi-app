@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
     const latestRequests = [
         { id: 1, name: 'Amy', age: 24, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Amy', time: '2h ago' },
-        { id: 2, name: 'Sophie', age: 26, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie', time: '5h ago' },
+        { id: 2, name: 'Sophie', age: 26, avatar: '/images/ai-sophie.png', time: '5h ago' },
         { id: 3, name: 'Emma', age: 23, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', time: '1d ago' },
     ];
 

@@ -161,7 +161,7 @@ export default function ChatPage() {
                 id: 'conv-ai-1',
                 matchId: 'ai-sophie',
                 matchName: 'Sophie (AI) 🤖',
-                matchPhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie',
+                matchPhoto: '/images/ai-sophie.png',
                 lastMessage: 'I am your AI companion. Let\'s chat!',
                 lastMessageAt: new Date().toISOString(),
                 messages: [

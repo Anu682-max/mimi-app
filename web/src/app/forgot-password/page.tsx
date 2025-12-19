@@ -16,11 +16,23 @@ export default function ForgotPasswordPage() {
         setError('');
         setIsLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            // Validate email format
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setError('Please enter a valid email address');
+                setIsLoading(false);
+                return;
+            }
+
+            // Simulate API call
+            setTimeout(() => {
+                setIsLoading(false);
+                setIsSubmitted(true);
+            }, 1500);
+        } catch (err) {
+            setError('Unable to send password reset link. Please try again.');
             setIsLoading(false);
-            setIsSubmitted(true);
-        }, 1500);
+        }
     };
 
     if (isSubmitted) {

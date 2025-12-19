@@ -20,6 +20,36 @@ export default function BrowsePage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showMatch, setShowMatch] = useState(false);
+    const [showQuestions, setShowQuestions] = useState(false);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [answers, setAnswers] = useState<string[]>([]);
+
+    const interestQuestions = [
+        {
+            question: 'What do you enjoy doing in your free time?',
+            options: ['Reading', 'Sports', 'Traveling', 'Cooking']
+        },
+        {
+            question: 'What kind of music do you like?',
+            options: ['Pop', 'Rock', 'Classical', 'Hip Hop']
+        },
+        {
+            question: 'Ideal weekend activity?',
+            options: ['Netflix', 'Hiking', 'Party', 'Relaxing']
+        },
+        {
+            question: 'What matters most in a relationship?',
+            options: ['Trust', 'Communication', 'Romance', 'Humor']
+        },
+        {
+            question: 'How do you handle conflicts?',
+            options: ['Talk it out', 'Need space', 'Compromise', 'Avoid']
+        },
+        {
+            question: "What's your love language?",
+            options: ['Quality time', 'Physical touch', 'Words', 'Gifts']
+        }
+    ];
 
     const profiles: Profile[] = [
         {
@@ -90,13 +120,31 @@ export default function BrowsePage() {
 
     const handleSwipe = (liked: boolean) => {
         if (liked) {
+            // Show interest questions before matching
+            setShowQuestions(true);
+            setCurrentQuestion(0);
+            setAnswers([]);
+        } else {
+            setCurrentIndex(prev => prev + 1);
+        }
+    };
+
+    const handleAnswerQuestion = (answer: string) => {
+        const newAnswers = [...answers, answer];
+        setAnswers(newAnswers);
+
+        if (currentQuestion < interestQuestions.length - 1) {
+            setCurrentQuestion(prev => prev + 1);
+        } else {
+            // All questions answered, now check for match
+            setShowQuestions(false);
             // Simulate match (30% chance)
             if (Math.random() > 0.7) {
                 setShowMatch(true);
                 setTimeout(() => setShowMatch(false), 3000);
             }
+            setCurrentIndex(prev => prev + 1);
         }
-        setCurrentIndex(prev => prev + 1);
     };
 
     return (
@@ -197,6 +245,58 @@ export default function BrowsePage() {
                     </div>
                 ) : null}
             </div>
+
+            {/* Interest Questions Modal */}
+            {showQuestions && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+                    <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 max-w-md w-full shadow-2xl border border-white/50">
+                        <div className="text-center mb-6">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 mb-4 shadow-lg">
+                                <SparklesIcon className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-2">
+                                Tell Us About Yourself
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                                Question {currentQuestion + 1} of {interestQuestions.length}
+                            </p>
+                        </div>
+
+                        <div className="mb-6">
+                            <p className="text-lg font-bold text-gray-800 text-center mb-6">
+                                {interestQuestions[currentQuestion].question}
+                            </p>
+                            
+                            <div className="space-y-3">
+                                {interestQuestions[currentQuestion].options.map((option, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleAnswerQuestion(option)}
+                                        className="w-full py-4 px-6 bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 text-gray-800 rounded-2xl font-bold transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 border border-pink-200"
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center gap-2">
+                            {interestQuestions.map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`h-2 w-2 rounded-full transition-all ${
+                                        idx === currentQuestion
+                                            ? 'bg-pink-500 w-8'
+                                            : idx < currentQuestion
+                                            ? 'bg-pink-400'
+                                            : 'bg-gray-300'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Match Modal */}
             {showMatch && (

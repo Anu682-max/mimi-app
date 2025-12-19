@@ -18,19 +18,19 @@ import { authRouter } from './auth/auth.routes';
 import { userRouter } from './user/user.routes';
 import { matchRouter } from './matching/match.routes';
 import { chatRouter } from './chat/chat.routes';
+import mediaRouter from './media/media.routes';
+import notificationRouter from './notification/notification.routes';
 import { localeMiddleware } from './common/middleware/locale.middleware';
 import { errorHandler } from './common/middleware/error.middleware';
 
 const app: express.Express = express();
 const httpServer = createServer(app);
 
-// Socket.io for real-time chat
-const io = new SocketServer(httpServer, {
-    cors: {
-        origin: process.env.CORS_ORIGIN || '*',
-        methods: ['GET', 'POST'],
-    },
-});
+// Socket.io initialization
+import { socketService } from './socket/socket.service';
+
+// Initialize Socket.io with the HTTP server
+const io = socketService.init(httpServer);
 
 // Middleware
 app.use(helmet({
@@ -65,6 +65,8 @@ app.use(`${apiPrefix}/auth`, authRouter);
 app.use(`${apiPrefix}/users`, userRouter);
 app.use(`${apiPrefix}/matches`, matchRouter);
 app.use(`${apiPrefix}/chat`, chatRouter);
+app.use(`${apiPrefix}/media`, mediaRouter);
+app.use(`${apiPrefix}/notifications`, notificationRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -77,23 +79,7 @@ app.use((req: Request, res: Response) => {
 // Error handler
 app.use(errorHandler);
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-    logger.info(`Socket connected: ${socket.id}`);
 
-    socket.on('join', (userId: string) => {
-        socket.join(`user:${userId}`);
-        logger.info(`User ${userId} joined socket room`);
-    });
-
-    socket.on('typing', ({ conversationId, userId }) => {
-        socket.to(`conversation:${conversationId}`).emit('typing', { userId });
-    });
-
-    socket.on('disconnect', () => {
-        logger.info(`Socket disconnected: ${socket.id}`);
-    });
-});
 
 // Attach io to app for use in routes
 app.set('io', io);

@@ -31,9 +31,8 @@ export default function ChatPage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { socket, isConnected } = useSocket();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://indate.vercel.app/api/v1';
-
-    // ... (existing helper functions) ...
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.[0]) return;

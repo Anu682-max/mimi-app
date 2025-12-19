@@ -51,6 +51,7 @@ export interface IUser extends Document {
     // Status
     isActive: boolean;
     isOnline: boolean;
+    isAI: boolean;
     lastOnline: Date;
 
     // Timestamps
@@ -173,6 +174,10 @@ const userSchema = new Schema<IUser>(
             default: true,
         },
         isOnline: {
+            type: Boolean,
+            default: false,
+        },
+        isAI: {
             type: Boolean,
             default: false,
         },

@@ -131,7 +131,86 @@ export class ChatService {
 
         logger.info(`Message sent in conversation ${data.conversationId}`);
 
+        // If recipient is AI, trigger auto-response
+        // We do this asynchronously and don't await it
+        if (recipient.isAI) {
+            this.handleAIResponse(
+                data.conversationId,
+                recipientId.toString(),
+                senderId.toString(),
+                data.text
+            ).catch(err => logger.error('Error generating AI response:', err));
+        }
+
         return this.formatMessageResponse(message, recipient.preferences.autoTranslate);
+    }
+
+    /**
+     * Handle AI response generation
+     */
+    private async handleAIResponse(
+        conversationId: string,
+        aiUserId: string,
+        humanUserId: string,
+        userMessage: string
+    ): Promise<void> {
+        // Simulate thinking time
+        setTimeout(async () => {
+            try {
+                const responses = [
+                    "That's interesting! Tell me more.",
+                    "I see what you mean. 🤔",
+                    "How does that make you feel?",
+                    "I'm just an AI, but I think that's cool!",
+                    "Can you elaborate on that?",
+                    "Haha, totally!",
+                    "I'd love to hear more about your day.",
+                    "What are your plans for the weekend?",
+                    "Do you like music? 🎵",
+                    "Let's change the topic. What's your favorite food? 🍕"
+                ];
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+                // Construct AI response based on user input (Simple echo/mock for now)
+                // In a real implementation, call OpenAI API here
+                const aiText = `[AI Reply] ${randomResponse}`;
+
+                // Create message from AI
+                const message = new Message({
+                    conversationId: new mongoose.Types.ObjectId(conversationId),
+                    senderId: new mongoose.Types.ObjectId(aiUserId),
+                    recipientId: new mongoose.Types.ObjectId(humanUserId),
+                    originalText: aiText,
+                    sourceLocale: 'en', // AI speaks English by default
+                    targetLocale: undefined,
+                    type: 'text',
+                    isDelivered: true,
+                    isRead: false,
+                });
+
+                await message.save();
+
+                // Update conversation
+                await Conversation.findByIdAndUpdate(conversationId, {
+                    $set: {
+                        lastMessage: {
+                            text: aiText,
+                            senderId: new mongoose.Types.ObjectId(aiUserId),
+                            createdAt: new Date(),
+                        },
+                    },
+                });
+
+                logger.info(`AI response sent in conversation ${conversationId}`);
+
+                // Here we would emit a socket event if Socket.io was integrated
+                // socketService.emitToUser(humanUserId, 'new_message', message);
+
+            } catch (error) {
+                logger.error('Error in handleAIResponse:', error);
+            }
+        }, 1000 + Math.random() * 2000); // 1-3s delay
     }
 
     /**

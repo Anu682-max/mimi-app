@@ -74,6 +74,26 @@ export default function ChatPage() {
                     },
                 ],
             }));
+
+            // Add Test AI User
+            mockConversations.unshift({
+                id: 'conv-ai-1',
+                matchId: 'ai-sophie',
+                matchName: 'Sophie (AI) 🤖',
+                matchPhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie',
+                lastMessage: 'I am your AI companion. Let\'s chat!',
+                lastMessageAt: new Date().toISOString(),
+                messages: [
+                    {
+                        id: 'ai-welcome',
+                        senderId: 'ai-sophie',
+                        senderName: 'Sophie (AI)',
+                        content: `Hello ${user.firstName}! I'm Sophie, your AI assistant on InDate. I can help you with translation, dating advice, or just chat! How are you today? ✨`,
+                        createdAt: new Date().toISOString(),
+                    }
+                ]
+            });
+
             setConversations(mockConversations);
         }
     }, [user]);
@@ -81,6 +101,54 @@ export default function ChatPage() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedConversation]);
+
+    const simulateAIResponse = (text: string) => {
+        if (!selectedConversation) return;
+
+        setTimeout(() => {
+            const responses = [
+                "That's interesting! Tell me more. 🤖",
+                "I see! As an AI, I'm learning every day.",
+                "How does that make you feel?",
+                "Can you elaborate on that?",
+                "That sounds fun! 😊",
+                "I'm here to listen.",
+                "What user activity shall we do next?",
+                "Do you like our new mobile design? 📱"
+            ];
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+            const aiMessage: Message = {
+                id: `ai-${Date.now()}`,
+                senderId: 'ai-sophie', // Must match AI ID
+                senderName: 'Sophie (AI)',
+                content: randomResponse,
+                createdAt: new Date().toISOString(),
+            };
+
+            setConversations(prev => prev.map(conv =>
+                conv.id === 'conv-ai-1'
+                    ? {
+                        ...conv,
+                        messages: [...conv.messages, aiMessage],
+                        lastMessage: randomResponse,
+                        lastMessageAt: new Date().toISOString(),
+                    }
+                    : conv
+            ));
+
+            // Safer update for the selected conversation
+            setSelectedConversation(prev => {
+                if (prev && prev.id === 'conv-ai-1') {
+                    return {
+                        ...prev,
+                        messages: [...prev.messages, aiMessage]
+                    };
+                }
+                return prev;
+            });
+        }, 1500);
+    };
 
     const sendMessage = () => {
         if (!newMessage.trim() || !selectedConversation || !user) return;
@@ -112,6 +180,11 @@ export default function ChatPage() {
         });
 
         setNewMessage('');
+
+        // Trigger AI response if chatting with AI
+        if (selectedConversation.id === 'conv-ai-1') {
+            simulateAIResponse(newMessage);
+        }
     };
 
     const selectConversation = (conv: Conversation) => {

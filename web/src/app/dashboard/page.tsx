@@ -42,7 +42,6 @@ export default function DashboardPage() {
     ];
 
     return (
-    return (
         <div className="min-h-screen bg-gradient-to-b from-purple-900 via-purple-700 to-pink-500 pb-24 relative overflow-x-hidden w-full">
             {/* Cosmic Background Effects */}
             <div className="absolute inset-0 overflow-hidden">

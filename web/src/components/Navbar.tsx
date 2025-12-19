@@ -23,7 +23,7 @@ export default function Navbar() {
                 💘 InDate
               </div>
             </Link>
-            
+
             {/* Location Display */}
             <div className="hidden md:block border-l border-gray-700 pl-4">
               <LocationDisplay />
@@ -32,44 +32,40 @@ export default function Navbar() {
 
           {/* Navigation Links */}
           {user ? (
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-6 lg:hidden">
               <Link
                 href="/discover"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/discover')
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/discover')
                     ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                }`}
+                  }`}
               >
                 Discover
               </Link>
               <Link
                 href="/chat"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/chat')
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/chat')
                     ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                }`}
+                  }`}
               >
                 Chat
               </Link>
               <Link
                 href="/profile"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/profile')
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/profile')
                     ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                }`}
+                  }`}
               >
                 Profile
               </Link>
               <Link
                 href="/settings"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/settings')
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/settings')
                     ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                }`}
+                  }`}
               >
                 Settings
               </Link>

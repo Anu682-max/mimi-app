@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketContext';
 import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { getMatches } from '@/utils/mockData';
 
@@ -28,6 +29,7 @@ interface Conversation {
 export default function ChatPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { socket, isConnected } = useSocket();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -39,6 +41,85 @@ export default function ChatPage() {
 
     // State for mobile view control
     const [showMobileChat, setShowMobileChat] = useState(false);
+
+    // Socket Event Listener
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (payload: any) => {
+            console.log('New message received via socket:', payload);
+
+            // Determine content to display (use translated if available)
+            const content = payload.showTranslation && payload.translatedText
+                ? payload.translatedText
+                : payload.originalText;
+
+            const newMessage: Message = {
+                id: payload.id,
+                senderId: payload.senderId,
+                senderName: 'Unknown', // Resolved below
+                content: content,
+                createdAt: payload.createdAt,
+            };
+
+            // Helper to update conversation state
+            const updateConversationList = (prevConvs: Conversation[]) => {
+                return prevConvs.map(conv => {
+                    // Check if message belongs to this conversation
+                    if (conv.matchId === payload.senderId || conv.matchId === payload.recipientId) {
+                        // Resolve sender name
+                        if (newMessage.senderId === conv.matchId) {
+                            newMessage.senderName = conv.matchName;
+                        } else {
+                            newMessage.senderName = 'You';
+                        }
+
+                        // Avoid duplicates
+                        if (conv.messages.some(m => m.id === newMessage.id)) {
+                            return conv;
+                        }
+
+                        return {
+                            ...conv,
+                            messages: [...conv.messages, newMessage],
+                            lastMessage: newMessage.content,
+                            lastMessageAt: newMessage.createdAt
+                        };
+                    }
+                    return conv;
+                });
+            };
+
+            setConversations(prev => updateConversationList(prev));
+
+            // Update selected conversation if it matches
+            setSelectedConversation(prev => {
+                if (prev && (prev.matchId === payload.senderId || prev.matchId === payload.recipientId)) {
+                    if (newMessage.senderId === prev.matchId) {
+                        newMessage.senderName = prev.matchName;
+                    } else {
+                        newMessage.senderName = 'You';
+                    }
+
+                    if (prev.messages.some(m => m.id === newMessage.id)) {
+                        return prev;
+                    }
+
+                    return {
+                        ...prev,
+                        messages: [...prev.messages, newMessage]
+                    };
+                }
+                return prev;
+            });
+        };
+
+        socket.on('new_message', handleNewMessage);
+
+        return () => {
+            socket.off('new_message', handleNewMessage);
+        };
+    }, [socket]);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -182,7 +263,8 @@ export default function ChatPage() {
         setNewMessage('');
 
         // Trigger AI response if chatting with AI
-        if (selectedConversation.id === 'conv-ai-1') {
+        // Only use local simulation if NOT connected to socket
+        if (selectedConversation.id === 'conv-ai-1' && !isConnected) {
             simulateAIResponse(newMessage);
         }
     };

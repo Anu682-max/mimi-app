@@ -72,16 +72,21 @@ export default function PWAInstallPrompt() {
     const handleDismiss = () => {
         setShowPrompt(false);
         // Don't show again for 7 days
-        localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+        }
     };
 
     // Don't show if already installed or dismissed recently
     if (isStandalone) return null;
 
-    const dismissedTime = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissedTime) {
-        const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
-        if (daysSinceDismissed < 7) return null;
+    // Check localStorage only on client side
+    if (typeof window !== 'undefined') {
+        const dismissedTime = localStorage.getItem('pwa-prompt-dismissed');
+        if (dismissedTime) {
+            const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
+            if (daysSinceDismissed < 7) return null;
+        }
     }
 
     if (!showPrompt) return null;

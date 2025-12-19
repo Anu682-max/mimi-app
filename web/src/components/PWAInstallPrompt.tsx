@@ -92,47 +92,53 @@ export default function PWAInstallPrompt() {
     if (!showPrompt) return null;
 
     return (
-        <div className={`pwa-install-prompt ${showPrompt ? 'show' : ''} safe-bottom`}>
-            <div className="flex items-center justify-between gap-3 max-w-screen-lg mx-auto">
-                <div className="flex items-center gap-3 flex-1">
-                    <div className="text-3xl">❤️</div>
-                    <div className="flex-1">
-                        <h3 className="font-bold text-white text-sm mb-1">
-                            Install InDate App
-                        </h3>
-                        {isIOS ? (
-                            <p className="text-xs text-white/80">
-                                Tap <span className="inline-block mx-1">
-                                    <svg className="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2l.01 7H19v2h-7v13l-2-.01V11H3V9h7.01z" />
-                                    </svg>
-                                </span> then "Add to Home Screen"
-                            </p>
-                        ) : (
-                            <p className="text-xs text-white/80">
-                                Get quick access and offline support
-                            </p>
-                        )}
+        <div
+            className={`fixed top-0 left-0 right-0 z-50 transform transition-transform duration-500 ease-out shadow-2xl ${showPrompt ? 'translate-y-0' : '-translate-y-full'
+                }`}
+        >
+            <div className="bg-gradient-to-r from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] border-b border-purple-500/30 backdrop-blur-xl p-4 safe-top">
+                <div className="max-w-screen-lg mx-auto flex items-center justify-between gap-4">
+                    {/* App Info */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+                            <span className="text-2xl animate-pulse">🔮</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-white text-base leading-tight truncate">
+                                Install InDate App
+                            </h3>
+                            {isIOS ? (
+                                <p className="text-xs text-gray-300 mt-0.5 flex items-center gap-1">
+                                    Tap <span className="inline-flex items-center justify-center w-5 h-5 bg-white/10 rounded mx-0.5"><svg className="w-3 h-3 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L12 15M12 2L6 8M12 2L18 8M5 21L19 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span> then "Add to Home Screen"
+                                </p>
+                            ) : (
+                                <p className="text-xs text-gray-300 mt-0.5">
+                                    Get the full magical experience ✨
+                                </p>
+                            )}
+                        </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    {!isIOS && deferredPrompt && (
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        {!isIOS && deferredPrompt && (
+                            <button
+                                onClick={handleInstallClick}
+                                className="bg-white text-purple-900 px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-white/10 hover:shadow-white/20 active:scale-95 transition-all animate-bounce-slow whitespace-nowrap"
+                            >
+                                Install
+                            </button>
+                        )}
                         <button
-                            onClick={handleInstallClick}
-                            className="bg-white text-purple-600 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors whitespace-nowrap"
+                            onClick={handleDismiss}
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                            aria-label="Dismiss"
                         >
-                            Install
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
-                    )}
-                    <button
-                        onClick={handleDismiss}
-                        className="text-white/80 hover:text-white p-2 transition-colors"
-                        aria-label="Dismiss"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>

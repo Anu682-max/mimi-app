@@ -15,9 +15,12 @@ import {
     XMarkIcon
 } from '@heroicons/react/24/solid';
 
+import { usePushNotification } from '@/hooks/usePushNotification';
+
 export default function DashboardPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuth();
+    const { permission, subscribeUser, isLoading: pushLoading } = usePushNotification();
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -34,6 +37,26 @@ export default function DashboardPage() {
     }
 
     if (!isAuthenticated) return null;
+
+    const NotificationBanner = () => (
+        permission === 'default' ? (
+            <div className="px-4 lg:px-0 mt-4 mb-4">
+                <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+                    <div>
+                        <p className="text-white font-bold text-sm">Enable Notifications</p>
+                        <p className="text-purple-200 text-xs text-left">Get instant updates for new matches</p>
+                    </div>
+                    <button
+                        onClick={subscribeUser}
+                        disabled={pushLoading}
+                        className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-xs font-bold transition-colors"
+                    >
+                        {pushLoading ? 'Enabling...' : 'Enable'}
+                    </button>
+                </div>
+            </div>
+        ) : null
+    );
 
     const latestRequests = [
         { id: 1, name: 'Amy', age: 24, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Amy', time: '2h ago' },
@@ -82,6 +105,8 @@ export default function DashboardPage() {
                         />
                     </button>
                 </header>
+
+                <NotificationBanner />
 
                 {/* PC Header */}
                 <div className="hidden lg:flex items-center justify-between mb-8">

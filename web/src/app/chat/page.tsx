@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import { getMatches } from '@/utils/mockData';
 
 interface Message {
@@ -29,8 +29,78 @@ interface Conversation {
 export default function ChatPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { socket, isConnected } = useSocket();
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://indate.vercel.app/api/v1';
+
+    // ... (existing helper functions) ...
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            // Optimistic update or loading state could go here
+
+            // Upload to backend
+            const token = localStorage.getItem('token'); // Simplification, ideally use getAccessToken
+            const response = await fetch(`${API_URL}/media/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+            const imageUrl = data.data.url;
+
+            // Send image as message
+            if (!selectedConversation || !user) return;
+
+            const message: Message = {
+                id: Date.now().toString(),
+                senderId: user.id,
+                senderName: user.firstName,
+                content: imageUrl, // Send URL as content
+                createdAt: new Date().toISOString(),
+            };
+
+            // Update UI (optimistic)
+            setConversations(conversations.map(conv =>
+                conv.id === selectedConversation.id
+                    ? {
+                        ...conv,
+                        messages: [...conv.messages, message],
+                        lastMessage: 'Sent a photo',
+                        lastMessageAt: new Date().toISOString(),
+                    }
+                    : conv
+            ));
+
+            setSelectedConversation({
+                ...selectedConversation,
+                messages: [...selectedConversation.messages, message],
+            });
+
+            // If socket connected, we should emit event? 
+            // Currently sendMessage logic duplicates this. Ideally we reuse sendMessage logic.
+            // For now, let's just trigger AI response if needed
+            if (selectedConversation.id === 'conv-ai-1' && !isConnected) {
+                setTimeout(() => simulateAIResponse("Nice photo! 📸"), 1000);
+            }
+
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload image');
+        }
+    };
+
 
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -496,7 +566,18 @@ export default function ChatPage() {
                                                             : 'bg-white/10 backdrop-blur-sm'
                                                             }`}
                                                     >
-                                                        <p className="text-white break-words text-sm md:text-base leading-snug">{message.content}</p>
+                                                        {(message.content.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/i) || message.content.includes('cloudinary.com')) ? (
+                                                            <div className="relative group">
+                                                                <img
+                                                                    src={message.content}
+                                                                    alt="Sent photo"
+                                                                    className="max-w-full rounded-lg max-h-60 object-cover cursor-pointer"
+                                                                    onClick={() => window.open(message.content, '_blank')}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-white break-words text-sm md:text-base leading-snug">{message.content}</p>
+                                                        )}
                                                         <p className={`text-[10px] md:text-xs mt-1 flex items-center space-x-1 ${isOwnMessage ? 'text-white/70' : 'text-gray-400'}`}>
                                                             <span>{formatTime(message.createdAt)}</span>
                                                             {message.edited && <span className="italic">· edited</span>}
@@ -536,6 +617,20 @@ export default function ChatPage() {
                         {/* Message Input */}
                         <div className="p-3 md:p-4 bg-black/40 backdrop-blur-xl border-t border-white/10 shrink-0 safe-bottom">
                             <div className="flex items-center space-x-2 md:space-x-3 bg-white/5 rounded-2xl p-1.5 md:p-2">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileSelect}
+                                />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="p-2 text-gray-400 hover:text-white transition-colors hover:bg-white/10 rounded-xl"
+                                    title="Send photo"
+                                >
+                                    <PhotoIcon className="w-5 h-5" />
+                                </button>
                                 <input
                                     type="text"
                                     value={newMessage}

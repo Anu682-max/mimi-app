@@ -18,6 +18,8 @@ import { authRouter } from './auth/auth.routes';
 import { userRouter } from './user/user.routes';
 import { matchRouter } from './matching/match.routes';
 import { chatRouter } from './chat/chat.routes';
+import mediaRouter from './media/media.routes';
+import notificationRouter from './notification/notification.routes';
 import { localeMiddleware } from './common/middleware/locale.middleware';
 import { errorHandler } from './common/middleware/error.middleware';
 
@@ -63,6 +65,8 @@ app.use(`${apiPrefix}/auth`, authRouter);
 app.use(`${apiPrefix}/users`, userRouter);
 app.use(`${apiPrefix}/matches`, matchRouter);
 app.use(`${apiPrefix}/chat`, chatRouter);
+app.use(`${apiPrefix}/media`, mediaRouter);
+app.use(`${apiPrefix}/notifications`, notificationRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

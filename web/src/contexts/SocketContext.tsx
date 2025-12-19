@@ -50,7 +50,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             });
 
             socketInstance.on('connect_error', (err) => {
-                console.error('Socket connection error:', err.message);
+                // Only log authentication errors if we actually have a token
+                if (token && err.message !== 'Authentication error') {
+                    console.error('Socket connection error:', err.message);
+                }
                 setIsConnected(false);
             });
 

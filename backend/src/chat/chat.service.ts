@@ -7,6 +7,7 @@
 import mongoose from 'mongoose';
 import { Message, Conversation, IMessage, IConversation } from './chat.model';
 import { userRepository } from '../user/user.repository';
+import { socketService } from '../socket/socket.service';
 import { createTranslationAdapter, TranslationAdapter } from '../ai/translation.adapter';
 import { config } from '../config';
 import { logger } from '../common/logger';
@@ -131,6 +132,11 @@ export class ChatService {
 
         logger.info(`Message sent in conversation ${data.conversationId}`);
 
+        const response = this.formatMessageResponse(message, recipient.preferences.autoTranslate);
+
+        // Emit socket event to recipient
+        socketService.emitToUser(recipientId.toString(), 'new_message', response);
+
         // If recipient is AI, trigger auto-response
         // We do this asynchronously and don't await it
         if (recipient.isAI) {
@@ -142,7 +148,7 @@ export class ChatService {
             ).catch(err => logger.error('Error generating AI response:', err));
         }
 
-        return this.formatMessageResponse(message, recipient.preferences.autoTranslate);
+        return response;
     }
 
     /**
@@ -204,8 +210,9 @@ export class ChatService {
 
                 logger.info(`AI response sent in conversation ${conversationId}`);
 
-                // Here we would emit a socket event if Socket.io was integrated
-                // socketService.emitToUser(humanUserId, 'new_message', message);
+                // Emit socket event for AI response
+                const aiResponse = this.formatMessageResponse(message, false);
+                socketService.emitToUser(humanUserId, 'new_message', aiResponse);
 
             } catch (error) {
                 logger.error('Error in handleAIResponse:', error);

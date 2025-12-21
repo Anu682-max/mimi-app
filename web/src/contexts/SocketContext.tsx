@@ -54,6 +54,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 if (token && err.message !== 'Authentication error') {
                     console.error('Socket connection error:', err.message);
                 }
+                
+                // If authentication error, clear invalid token
+                if (err.message === 'Authentication error' && token) {
+                    console.warn('Invalid token detected, clearing auth data');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    sessionStorage.removeItem('token');
+                    sessionStorage.removeItem('user');
+                    // Optionally reload the page
+                    // window.location.reload();
+                }
+                
                 setIsConnected(false);
             });
 

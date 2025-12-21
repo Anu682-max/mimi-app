@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, PhotoIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/solid';
 import { getMatches } from '@/utils/mockData';
 
 interface Message {
@@ -110,6 +110,32 @@ export default function ChatPage() {
 
     // State for mobile view control
     const [showMobileChat, setShowMobileChat] = useState(false);
+
+    // State for video/voice calls
+    const [isInCall, setIsInCall] = useState(false);
+    const [callType, setCallType] = useState<'voice' | 'video' | null>(null);
+
+    const startVoiceCall = () => {
+        if (!selectedConversation) return;
+        setCallType('voice');
+        setIsInCall(true);
+        // TODO: Implement WebRTC voice call logic
+        console.log('Starting voice call with:', selectedConversation.matchName);
+    };
+
+    const startVideoCall = () => {
+        if (!selectedConversation) return;
+        setCallType('video');
+        setIsInCall(true);
+        // TODO: Implement WebRTC video call logic
+        console.log('Starting video call with:', selectedConversation.matchName);
+    };
+
+    const endCall = () => {
+        setIsInCall(false);
+        setCallType(null);
+        // TODO: Clean up WebRTC connections
+    };
 
     // Socket Event Listener
     useEffect(() => {
@@ -502,6 +528,24 @@ export default function ChatPage() {
                                     Active now
                                 </p>
                             </div>
+
+                            {/* Call Buttons */}
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    onClick={startVoiceCall}
+                                    className="p-2 md:p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all hover:scale-110 active:scale-95"
+                                    title="Voice call"
+                                >
+                                    <PhoneIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                                </button>
+                                <button
+                                    onClick={startVideoCall}
+                                    className="p-2 md:p-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-full transition-all hover:scale-110 active:scale-95 shadow-lg"
+                                    title="Video call"
+                                >
+                                    <VideoCameraIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Messages */}
@@ -693,6 +737,107 @@ export default function ChatPage() {
                                 <p className="text-center text-xl font-bold text-white">{viewingAvatar.name}</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Video/Voice Call Modal */}
+            {isInCall && selectedConversation && (
+                <div className="fixed inset-0 z-[100] bg-gradient-to-br from-purple-900 via-pink-900 to-black flex flex-col items-center justify-center p-4">
+                    {/* Call UI */}
+                    <div className="w-full max-w-4xl flex flex-col items-center">
+                        {/* Video Display Area */}
+                        {callType === 'video' && (
+                            <div className="w-full aspect-video bg-black/50 backdrop-blur-xl rounded-3xl overflow-hidden mb-8 relative border border-white/20 shadow-2xl">
+                                {/* Remote Video (Placeholder) */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <img
+                                            src={selectedConversation.matchPhoto}
+                                            alt={selectedConversation.matchName}
+                                            className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-pink-500 animate-pulse"
+                                        />
+                                        <p className="text-white text-xl font-semibold">Connecting...</p>
+                                        <p className="text-gray-300 text-sm mt-2">Video call feature coming soon</p>
+                                    </div>
+                                </div>
+                                
+                                {/* Local Video Preview (Small window) */}
+                                <div className="absolute top-4 right-4 w-32 h-24 bg-gray-800 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                                        Your video
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Voice Call UI */}
+                        {callType === 'voice' && (
+                            <div className="mb-8">
+                                <img
+                                    src={selectedConversation.matchPhoto}
+                                    alt={selectedConversation.matchName}
+                                    className="w-40 h-40 rounded-full mx-auto mb-6 border-4 border-purple-500 animate-pulse shadow-2xl"
+                                />
+                            </div>
+                        )}
+
+                        {/* Call Info */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-bold text-white mb-2">{selectedConversation.matchName}</h2>
+                            <p className="text-pink-300 text-lg">
+                                {callType === 'video' ? '📹 Video Call' : '📞 Voice Call'}
+                            </p>
+                            <p className="text-gray-400 text-sm mt-2">00:00</p>
+                        </div>
+
+                        {/* Call Controls */}
+                        <div className="flex items-center gap-4">
+                            {/* Mute Mic */}
+                            <button
+                                className="p-5 bg-white/20 hover:bg-white/30 rounded-full transition-all hover:scale-110 active:scale-95"
+                                title="Mute microphone"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-white">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                                </svg>
+                            </button>
+
+                            {/* End Call */}
+                            <button
+                                onClick={endCall}
+                                className="p-6 bg-red-500 hover:bg-red-600 rounded-full transition-all hover:scale-110 active:scale-95 shadow-2xl"
+                                title="End call"
+                            >
+                                <PhoneIcon className="w-8 h-8 text-white transform rotate-135" />
+                            </button>
+
+                            {/* Toggle Video (only in video call) */}
+                            {callType === 'video' && (
+                                <button
+                                    className="p-5 bg-white/20 hover:bg-white/30 rounded-full transition-all hover:scale-110 active:scale-95"
+                                    title="Toggle camera"
+                                >
+                                    <VideoCameraIcon className="w-6 h-6 text-white" />
+                                </button>
+                            )}
+
+                            {/* Switch to Video (only in voice call) */}
+                            {callType === 'voice' && (
+                                <button
+                                    onClick={() => setCallType('video')}
+                                    className="p-5 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-full transition-all hover:scale-110 active:scale-95"
+                                    title="Switch to video"
+                                >
+                                    <VideoCameraIcon className="w-6 h-6 text-white" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Info Text */}
+                        <p className="text-gray-400 text-sm mt-8 text-center">
+                            WebRTC integration coming soon. This is a UI preview.
+                        </p>
                     </div>
                 </div>
             )}

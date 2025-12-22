@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
+import AppLayout from '@/components/AppLayout';
 import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, PhotoIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/solid';
 import { getMatches } from '@/utils/mockData';
 

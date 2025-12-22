@@ -12,6 +12,12 @@ export default function Home() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -25,9 +31,9 @@ export default function Home() {
     setShowLanguageModal(false);
   };
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
       </div>
     );

@@ -74,12 +74,11 @@ export function usePushNotifications() {
             const registration = await navigator.serviceWorker.register('/sw.js');
             await navigator.serviceWorker.ready;
 
-            // Get VAPID public key
-            const keyResponse = await fetch(`${API_URL}/api/v1/notifications/vapid-key`);
-            const keyData = await keyResponse.json();
-
-            if (!keyData.success) {
-                console.error('VAPID key not available');
+            // Get VAPID public key from environment
+            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+            
+            if (!vapidPublicKey) {
+                console.warn('VAPID key not configured');
                 setState(prev => ({ ...prev, isLoading: false }));
                 return false;
             }
@@ -87,7 +86,7 @@ export function usePushNotifications() {
             // Subscribe to push manager
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(keyData.publicKey),
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
             });
 
             // Send subscription to server

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeIcon,
@@ -10,11 +10,13 @@ import {
   UserIcon,
   Cog6ToothIcon,
   HeartIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
 
   if (!user) return null;
 
@@ -67,17 +69,29 @@ export default function Sidebar() {
 
         {/* User Info */}
         <div className="px-4 py-4 border-t border-gray-800">
-          <div className="flex items-center">
+          <div className="flex items-center mb-3">
             <div className="shrink-0">
               <div className="h-10 w-10 rounded-full bg-linear-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold">
                 {user.firstName?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user.firstName || 'User'}</p>
-              <p className="text-xs text-gray-400">{user.email}</p>
+            <div className="ml-3 flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user.firstName || 'User'}</p>
+              <p className="text-xs text-gray-400 truncate">{user.email}</p>
             </div>
           </div>
+          
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              logout();
+              router.push('/');
+            }}
+            className="w-full flex items-center justify-center px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition gap-2 group"
+          >
+            <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            <span className="font-medium">Logout</span>
+          </button>
         </div>
       </div>
     </aside>

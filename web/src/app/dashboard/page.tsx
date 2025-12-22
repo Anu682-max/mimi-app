@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import AppLayout from '@/components/AppLayout';
 import {
     HeartIcon,
     ChatBubbleLeftIcon,
@@ -65,8 +66,9 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-purple-900 via-purple-700 to-pink-500 pb-24 relative overflow-x-hidden w-full lg:bg-none lg:bg-[#0A0A0F]">
-            {/* Cosmic Background Effects - Hidden on Desktop to use main layout bg */}
+        <AppLayout>
+            <div className="min-h-screen bg-gradient-to-b from-purple-900 via-purple-700 to-pink-500 pb-24 relative overflow-x-hidden w-full lg:bg-none lg:bg-[#0A0A0F]">
+                {/* Cosmic Background Effects - Hidden on Desktop to use main layout bg */}
             <div className="absolute inset-0 overflow-hidden lg:hidden">
                 {/* Smoke/Cloud Effects */}
                 <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-900/40 to-transparent opacity-60 blur-3xl" />
@@ -219,5 +221,6 @@ export default function DashboardPage() {
                 </div>
             </div>
         </div>
+        </AppLayout>
     );
 }

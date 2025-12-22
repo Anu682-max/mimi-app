@@ -129,12 +129,18 @@ export default function SettingsPage() {
 
                 {/* Logout */}
                 {isAuthenticated && (
-                    <button
-                        onClick={handleLogout}
-                        className="w-full p-4 bg-[#1A1A24] rounded-xl text-pink-400 font-semibold hover:bg-gray-800 transition"
-                    >
-                        {t('settings.logout')}
-                    </button>
+                    <section>
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                            Account
+                        </h2>
+                        <button
+                            onClick={handleLogout}
+                            className="w-full p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+                        >
+                            <span>🚪</span>
+                            <span>{t('settings.logout')}</span>
+                        </button>
+                    </section>
                 )}
             </div>
 

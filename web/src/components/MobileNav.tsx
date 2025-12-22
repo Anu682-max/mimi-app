@@ -17,6 +17,7 @@ export default function MobileNav() {
     { name: 'Matches', path: '/matches', icon: '❤️' },
     { name: 'Chat', path: '/chat', icon: '💬' },
     { name: 'Profile', path: '/profile', icon: '👤' },
+    { name: 'Settings', path: '/settings', icon: '⚙️' },
   ];
 
   return (

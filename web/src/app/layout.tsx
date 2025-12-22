@@ -58,18 +58,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} font-sans antialiased bg-[#0A0A0F] text-white min-h-screen flex flex-col`}
+        className={`${inter.variable} font-sans antialiased bg-[#0A0A0F] text-white min-h-screen`}
       >
         <Providers>
-          <Navbar />
-          <div className="flex flex-1">
-            <Sidebar />
-            <main className="flex-1 lg:ml-64 pb-16 lg:pb-0 w-full">
-              {children}
-            </main>
-          </div>
-          <Footer />
-          <MobileNav />
+          {children}
         </Providers>
       </body>
     </html>

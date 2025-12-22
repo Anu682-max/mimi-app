@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { CameraIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, PlusIcon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 interface ProfileData {
     firstName: string;
@@ -19,7 +19,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
     const [profile, setProfile] = useState<ProfileData>({
         firstName: '',
@@ -108,13 +108,26 @@ export default function ProfilePage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold">Edit Profile</h1>
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="px-6 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg transition disabled:opacity-50"
-                    >
-                        {isSaving ? 'Saving...' : 'Save'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => {
+                                logout();
+                                router.push('/');
+                            }}
+                            className="px-4 py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 rounded-lg transition flex items-center gap-2"
+                            title="Logout"
+                        >
+                            <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="px-6 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg transition disabled:opacity-50"
+                        >
+                            {isSaving ? 'Saving...' : 'Save'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Message */}

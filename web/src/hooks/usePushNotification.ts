@@ -50,16 +50,12 @@ export function usePushNotification() {
                 throw new Error('Permission denied');
             }
 
-            // Get VAPID key from backend
-            const keyRes = await fetch(`${API_URL}/notifications/vapid-key`);
-            if (!keyRes.ok) throw new Error('Failed to fetch VAPID key');
-
-            const keyData = await keyRes.json();
-            const vapidKey = keyData.publicKey;
+            // Get VAPID key from environment variable
+            const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
 
             if (!vapidKey) {
-                console.warn('No VAPID key configured on server. Push notifications will be mocked.');
-                setError('Server not configured for push notifications');
+                console.warn('No VAPID key configured. Push notifications disabled.');
+                setError('Push notifications not configured');
                 return;
             }
 

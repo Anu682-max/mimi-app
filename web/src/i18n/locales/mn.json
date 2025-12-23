@@ -1,0 +1,61 @@
+{
+    "common": {
+        "ok": "За",
+        "cancel": "Цуцлах",
+        "save": "Хадгалах",
+        "back": "Буцах",
+        "next": "Дараах",
+        "loading": "Ачааллаж байна..."
+    },
+    "auth": {
+        "login_title": "Нэвтрэх",
+        "signup_title": "Бүртгүүлэх",
+        "email": "Имэйл",
+        "password": "Нууц үг",
+        "login_button": "Нэвтрэх",
+        "signup_button": "Бүртгүүлэх",
+        "forgot_password": "Нууц үгээ мартсан уу?",
+        "or_continue_with": "Эсвэл үргэлжлүүлэх",
+        "dont_have_account": "Бүртгэлгүй юу?"
+    },
+    "profile": {
+        "title": "Профайл",
+        "edit_profile": "Профайл засах",
+        "distance": "{{distance}} км зайд",
+        "verified": "Баталгаажсан"
+    },
+    "onboarding": {
+        "welcome": "InDate-д тавтай морил",
+        "tagline": "AI-аар төгс хосоо олоорой"
+    },
+    "discover": {
+        "title": "Олох",
+        "no_more_profiles": "Ойролцоо профайл алга"
+    },
+    "matching": {
+        "its_a_match": "Тохирсон!",
+        "send_message": "Мессеж илгээх",
+        "keep_swiping": "Үргэлжлүүлэх"
+    },
+    "chat": {
+        "title": "Мессежүүд",
+        "no_messages": "Одоогоор мессеж алга",
+        "type_message": "Мессеж бичнэ үү...",
+        "send": "Илгээх",
+        "translate": "Орчуулах",
+        "translated_from": "{{language}} хэлнээс орчуулсан",
+        "show_original": "Эх хувилбар",
+        "show_translation": "Орчуулга",
+        "typing": "Бичиж байна..."
+    },
+    "settings": {
+        "title": "Тохиргоо",
+        "account": "Бүртгэл",
+        "language": "Хэл",
+        "change_language": "Хэл солих",
+        "dark_mode": "Харанхуй горим",
+        "notifications": "Мэдэгдэл",
+        "privacy": "Нууцлал",
+        "logout": "Гарах"
+    }
+}

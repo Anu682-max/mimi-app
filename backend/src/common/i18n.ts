@@ -10,9 +10,9 @@ import path from 'path';
 import { logger } from './logger';
 
 // Supported locales
-export type Locale = 'en' | 'ja' | 'ko' | 'de' | 'fr' | 'es' | 'zh';
+export type Locale = 'en' | 'ja' | 'ko' | 'mn' | 'de' | 'fr' | 'es' | 'zh';
 
-export const SUPPORTED_LOCALES: Locale[] = ['en', 'ja', 'ko', 'de', 'fr', 'es', 'zh'];
+export const SUPPORTED_LOCALES: Locale[] = ['en', 'ja', 'ko', 'mn', 'de', 'fr', 'es', 'zh'];
 export const DEFAULT_LOCALE: Locale = 'en';
 
 // Translation cache
@@ -23,6 +23,7 @@ export const LOCALE_DISPLAY_NAMES: Record<Locale, string> = {
     en: 'English',
     ja: '日本語',
     ko: '한국어',
+    mn: 'Монгол',
     de: 'Deutsch',
     fr: 'Français',
     es: 'Español',

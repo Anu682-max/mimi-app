@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { CameraIcon, PlusIcon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
@@ -20,6 +20,8 @@ interface ProfileData {
 export default function ProfilePage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3699';
 
     const [profile, setProfile] = useState<ProfileData>({
         firstName: '',
@@ -33,6 +35,7 @@ export default function ProfilePage() {
         photos: [],
     });
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [message, setMessage] = useState('');
     const [newInterest, setNewInterest] = useState('');
 
@@ -92,6 +95,109 @@ export default function ProfilePage() {
         });
     };
 
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        setIsUploading(true);
+        setMessage('');
+
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Upload to backend
+            const uploadResponse = await fetch(`${API_URL}/api/v1/media/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const uploadData = await uploadResponse.json();
+
+            if (!uploadResponse.ok) {
+                // Show specific error message
+                const errorMsg = uploadData.hint 
+                    ? `${uploadData.message}\n\n${uploadData.hint}`
+                    : uploadData.message || 'Upload failed';
+                throw new Error(errorMsg);
+            }
+
+            const imageUrl = uploadData.data.url;
+
+            // Add photo to user profile
+            const updateResponse = await fetch(`${API_URL}/api/v1/users/me/photo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ photoUrl: imageUrl })
+            });
+
+            if (!updateResponse.ok) throw new Error('Failed to update profile');
+
+            const updateData = await updateResponse.json();
+            
+            // Update local state
+            setProfile(prev => ({
+                ...prev,
+                photos: updateData.photos || [...prev.photos, imageUrl]
+            }));
+
+            setMessage('✅ Photo uploaded successfully!');
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('Photo upload error:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to upload photo';
+            setMessage(`❌ ${errorMsg}`);
+            
+            // Don't auto-hide error messages
+            if (!errorMsg.includes('not configured')) {
+                setTimeout(() => setMessage(''), 5000);
+            }
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handlePhotoDelete = async (photoUrl: string) => {
+        if (!confirm('Remove this photo?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            
+            const response = await fetch(`${API_URL}/api/v1/users/me/photo`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ photoUrl })
+            });
+
+            if (!response.ok) throw new Error('Failed to delete photo');
+
+            const data = await response.json();
+            
+            // Update local state
+            setProfile(prev => ({
+                ...prev,
+                photos: data.photos || prev.photos.filter(p => p !== photoUrl)
+            }));
+
+            setMessage('Photo removed successfully!');
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('Photo delete error:', error);
+            setMessage('Failed to remove photo. Please try again.');
+        }
+    };
+
     if (authLoading) {
         return (
             <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
@@ -132,8 +238,14 @@ export default function ProfilePage() {
 
                 {/* Message */}
                 {message && (
-                    <div className="mb-6 p-4 bg-green-500/20 text-green-500 rounded-lg text-center">
-                        {message}
+                    <div className={`mb-6 p-4 rounded-lg text-center ${
+                        message.startsWith('✅') 
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                            : message.startsWith('❌')
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            : 'bg-green-500/20 text-green-400'
+                    }`}>
+                        <div className="whitespace-pre-line">{message}</div>
                     </div>
                 )}
 
@@ -142,14 +254,70 @@ export default function ProfilePage() {
                     {/* Photos */}
                     <div className="bg-[#13131a] border border-gray-800 rounded-xl p-6">
                         <label className="block text-sm font-medium mb-4">Profile Photos</label>
-                        <div className="grid grid-cols-3 gap-4">
-                            {profile.photos.length === 0 && (
-                                <div className="col-span-3 text-center text-gray-400 py-8">
-                                    <CameraIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                    <p>No photos yet</p>
+                        
+                        {/* Cloudinary not configured notice */}
+                        <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                            <div className="flex items-start gap-3">
+                                <span className="text-2xl">📸</span>
+                                <div className="flex-1">
+                                    <h3 className="text-yellow-500 font-medium mb-1">Photo Upload Temporarily Disabled</h3>
+                                    <p className="text-sm text-gray-400 mb-2">
+                                        To enable photo uploads, configure Cloudinary in your backend settings.
+                                    </p>
+                                    <details className="text-xs text-gray-500">
+                                        <summary className="cursor-pointer hover:text-gray-400">Show setup instructions</summary>
+                                        <ol className="mt-2 ml-4 list-decimal space-y-1">
+                                            <li>Create free account at <a href="https://cloudinary.com/users/register_free" target="_blank" className="text-pink-500 hover:underline">cloudinary.com</a></li>
+                                            <li>Copy credentials from Dashboard</li>
+                                            <li>Update backend/.env file with your credentials</li>
+                                            <li>Restart backend server</li>
+                                        </ol>
+                                    </details>
                                 </div>
+                            </div>
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handlePhotoUpload}
+                            accept="image/*"
+                            className="hidden"
+                            disabled
+                        />
+                        <div className="grid grid-cols-3 gap-4 opacity-50 pointer-events-none">
+                            {profile.photos.map((photo, index) => (
+                                <div key={index} className="relative aspect-square">
+                                    <img
+                                        src={photo}
+                                        alt={`Photo ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-lg"
+                                    />
+                                    <button
+                                        onClick={() => handlePhotoDelete(photo)}
+                                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full transition"
+                                        disabled
+                                    >
+                                        <XMarkIcon className="w-4 h-4" />
+                                    </button>
+                                    {index === 0 && (
+                                        <div className="absolute bottom-2 left-2 px-2 py-1 bg-pink-500 text-xs rounded-full">
+                                            Main
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {profile.photos.length < 6 && (
+                                <button
+                                    disabled
+                                    className="aspect-square border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center gap-2 cursor-not-allowed"
+                                >
+                                    <PlusIcon className="w-8 h-8 text-gray-600" />
+                                    <span className="text-xs text-gray-600">Add Photo</span>
+                                </button>
                             )}
                         </div>
+                        <p className="text-xs text-gray-500 mt-2">📷 Photo uploads will be enabled after Cloudinary setup.</p>
                     </div>
 
                     {/* Basic Info */}

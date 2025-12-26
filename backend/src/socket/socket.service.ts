@@ -20,14 +20,20 @@ export class SocketService {
     }
 
     public init(httpServer: HttpServer): SocketServer {
+        const corsOrigin = process.env.CORS_ORIGIN || '*';
+        logger.info(`🔌 Initializing Socket.IO server with CORS origin: ${corsOrigin}`);
+        
         this.io = new SocketServer(httpServer, {
             cors: {
-                origin: process.env.CORS_ORIGIN || '*',
+                origin: corsOrigin,
                 methods: ['GET', 'POST'],
                 credentials: true
             },
             pingTimeout: 60000,
+            transports: ['websocket', 'polling'],
         });
+
+        logger.info('✅ Socket.IO server initialized successfully');
 
         // Authentication Middleware
         this.io.use(async (socket, next) => {

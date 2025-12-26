@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSocket } from '@/contexts/SocketContext';
+import { useSocket as useSocketHook } from '@/hooks/useSocket';
 import AppLayout from '@/components/AppLayout';
 import { PaperAirplaneIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon, PhotoIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/solid';
 import { getMatches } from '@/utils/mockData';
@@ -31,11 +31,17 @@ export default function ChatPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { socket, isConnected } = useSocket();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://indate.vercel.app/api/v1';
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Socket connection with typing support
+    const { isConnected, typingUsers, startTyping, stopTyping, socket } = useSocketHook({
+        conversationId: selectedConversation?.id,
+        autoConnect: !!user,
+    });
+
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
         if (!e.target.files?.[0]) return;
 
         const file = e.target.files[0];
@@ -115,6 +121,67 @@ export default function ChatPage() {
     // State for video/voice calls
     const [isInCall, setIsInCall] = useState(false);
     const [callType, setCallType] = useState<'voice' | 'video' | null>(null);
+
+    // Typing debounce timer
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/media/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+            const imageUrl = data.data.url;
+
+            if (!selectedConversation || !user) return;
+
+            const message: Message = {
+                id: Date.now().toString(),
+                senderId: user.id,
+                senderName: user.firstName,
+                content: imageUrl,
+                createdAt: new Date().toISOString(),
+            };
+
+            setConversations(conversations.map(conv =>
+                conv.id === selectedConversation.id
+                    ? {
+                        ...conv,
+                        messages: [...conv.messages, message],
+                        lastMessage: 'Sent a photo',
+                        lastMessageAt: new Date().toISOString(),
+                    }
+                    : conv
+            ));
+
+            setSelectedConversation({
+                ...selectedConversation,
+                messages: [...selectedConversation.messages, message],
+            });
+
+            if (selectedConversation.id === 'conv-ai-1' && !isConnected) {
+                setTimeout(() => simulateAIResponse("Nice photo! 📸"), 1000);
+            }
+
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload image');
+        }
+    };
 
     const startVoiceCall = () => {
         if (!selectedConversation) return;
@@ -520,14 +587,23 @@ export default function ChatPage() {
                                 src={selectedConversation.matchPhoto}
                                 alt={selectedConversation.matchName}
                                 onClick={() => setViewingAvatar({ src: selectedConversation.matchPhoto, name: selectedConversation.matchName })}
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-pink-500/50 cursor-pointer hover:border-pink-400 transition-colors shrink-0"
-                            />
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-pink-500/50 cursor-pointer hover:border-pink-400 transition-colors shrink-0 relative"
+                            >
+                            </img>
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-base md:text-lg truncate">{selectedConversation.matchName}</p>
-                                <p className="text-xs text-green-400 flex items-center">
-                                    <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full mr-2 shrink-0"></span>
-                                    Active now
-                                </p>
+                                {/* Real-time Online/Offline Status */}
+                                {typingUsers.length > 0 ? (
+                                    <p className="text-xs text-pink-400 flex items-center italic">
+                                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-pink-400 rounded-full mr-2 shrink-0 animate-pulse"></span>
+                                        typing...
+                                    </p>
+                                ) : (
+                                    <p className={`text-xs flex items-center ${isConnected ? 'text-green-400' : 'text-gray-500'}`}>
+                                        <span className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-2 shrink-0 ${isConnected ? 'bg-green-400' : 'bg-gray-500'}`}></span>
+                                        {isConnected ? 'Online' : 'Offline'}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Call Buttons */}
@@ -660,6 +736,21 @@ export default function ChatPage() {
 
                         {/* Message Input */}
                         <div className="p-3 md:p-4 bg-black/40 backdrop-blur-xl border-t border-white/10 shrink-0 safe-bottom">
+                            {/* Socket Connection Status */}
+                            {!isConnected && (
+                                <div className="mb-2 px-3 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-300 text-xs flex items-center space-x-2">
+                                    <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                                    <span>⚠️ Offline - Messages will be sent when reconnected</span>
+                                </div>
+                            )}
+                            
+                            {/* Typing Indicator */}
+                            {typingUsers.length > 0 && (
+                                <div className="mb-2 px-3 py-2 bg-pink-500/10 border border-pink-500/20 rounded-lg text-pink-300 text-xs italic">
+                                    {selectedConversation.matchName} is typing...
+                                </div>
+                            )}
+                            
                             <div className="flex items-center space-x-2 md:space-x-3 bg-white/5 rounded-2xl p-1.5 md:p-2">
                                 <input
                                     type="file"
@@ -678,13 +769,46 @@ export default function ChatPage() {
                                 <input
                                     type="text"
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                    onChange={(e) => {
+                                        setNewMessage(e.target.value);
+                                        // Emit typing indicator
+                                        if (e.target.value.trim()) {
+                                            startTyping();
+                                            // Clear previous timeout
+                                            if (typingTimeoutRef.current) {
+                                                clearTimeout(typingTimeoutRef.current);
+                                            }
+                                            // Auto-stop typing after 2 seconds
+                                            typingTimeoutRef.current = setTimeout(() => {
+                                                stopTyping();
+                                            }, 2000);
+                                        } else {
+                                            stopTyping();
+                                            if (typingTimeoutRef.current) {
+                                                clearTimeout(typingTimeoutRef.current);
+                                            }
+                                        }
+                                    }}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            sendMessage();
+                                            stopTyping();
+                                            if (typingTimeoutRef.current) {
+                                                clearTimeout(typingTimeoutRef.current);
+                                            }
+                                        }
+                                    }}
                                     placeholder="Type a message..."
                                     className="flex-1 bg-transparent px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-white placeholder-gray-500 focus:outline-none"
                                 />
                                 <button
-                                    onClick={sendMessage}
+                                    onClick={() => {
+                                        sendMessage();
+                                        stopTyping();
+                                        if (typingTimeoutRef.current) {
+                                            clearTimeout(typingTimeoutRef.current);
+                                        }
+                                    }}
                                     disabled={!newMessage.trim()}
                                     className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl p-2.5 md:p-3 transition-all transform hover:scale-105"
                                 >

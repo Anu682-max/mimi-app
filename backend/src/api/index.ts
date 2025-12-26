@@ -1073,13 +1073,13 @@ app.post(`${apiPrefix}/notifications/send`, async (req: Request, res: Response):
     }
 });
 
-// AI Routes
-import aiRoutes from '../ai/ai.routes';
-app.use(`${apiPrefix}/ai`, aiRoutes);
-
 // Email Routes
 import emailRoutes from '../services/email.routes';
 app.use(`${apiPrefix}/email`, emailRoutes);
+
+// Media/Image Upload Routes
+import mediaRoutes from '../media/media.routes';
+app.use(`${apiPrefix}/media`, mediaRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response): void => {

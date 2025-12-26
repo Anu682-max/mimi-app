@@ -37,7 +37,17 @@
         "title": "Messages",
         "type_message": "Type a message...",
         "translate": "Translate",
-        "show_original": "Show Original"
+        "show_original": "Show Original",
+        "send": "Send",
+        "typing": "typing...",
+        "is_typing": "is typing...",
+        "online": "Online",
+        "offline": "Offline",
+        "offline_mode": "⚠️ Offline Mode - Messages will be sent when reconnected",
+        "no_messages": "No messages yet",
+        "start_conversation": "Start a conversation!",
+        "show_translation": "Show Translation",
+        "translated_from": "Translated from {{language}}"
     },
     "settings": {
         "title": "Settings",

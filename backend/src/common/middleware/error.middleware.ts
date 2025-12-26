@@ -58,7 +58,7 @@ export function errorHandler(
     }
 
     // Translate error message if it's a translation key
-    let message = err.message;
+    let message = err.message || 'An unexpected error occurred';
     if (err.code) {
         // If error has a code, try to translate it
         const translatedMessage = t(`errors.${err.code}`, locale, err.params);
@@ -68,7 +68,7 @@ export function errorHandler(
     }
 
     // Check for validation errors with embedded code
-    if (message.startsWith('VALIDATION_')) {
+    if (message && message.startsWith('VALIDATION_')) {
         const [code, ...params] = message.split(':');
         const translationKey = code.toLowerCase().replace('validation_', 'validation.');
         message = t(translationKey, locale, { min: params[0] });

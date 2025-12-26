@@ -1,7 +1,7 @@
 /**
  * Chat Screen
  * 
- * Messaging screen with translation support
+ * Messaging screen with translation support and real-time features
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -21,6 +21,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 
 import { useDateFormatter, useLocale } from '../../i18n/hooks';
 import { useChat } from '../../hooks/useChat';
+import { useSocket, useSocketMessages, useOnlineStatus } from '../../hooks/useSocket';
 
 interface Message {
     id: string;
@@ -94,38 +95,97 @@ export function ChatScreen() {
     const route = useRoute();
     const flatListRef = useRef<FlatList>(null);
 
-    const { conversationId, recipientName, recipientPhoto } = route.params as any;
+    const { conversationId, recipientName, recipientPhoto, recipientId } = route.params as any;
     const { messages, sendMessage, isLoading, isTyping } = useChat(conversationId);
 
     const [inputText, setInputText] = useState('');
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Socket.IO real-time features
+    const { 
+        isConnected, 
+        typingUsers, 
+        startTyping: emitStartTyping, 
+        stopTyping: emitStopTyping 
+    } = useSocket({ 
+        conversationId, 
+        autoConnect: true 
+    });
+    const socketMessages = useSocketMessages(conversationId);
+    const isRecipientOnline = useOnlineStatus(recipientId);
 
     useEffect(() => {
-        // Set header with recipient info
+        // Set header with recipient info and online status
         navigation.setOptions({
             headerTitle: () => (
                 <View style={styles.headerTitle}>
                     {recipientPhoto && (
-                        <Image source={{ uri: recipientPhoto }} style={styles.headerAvatar} />
+                        <View style={styles.avatarContainer}>
+                            <Image source={{ uri: recipientPhoto }} style={styles.headerAvatar} />
+                            {/* Online status indicator */}
+                            {isRecipientOnline && (
+                                <View style={styles.onlineIndicator} />
+                            )}
+                        </View>
                     )}
                     <View>
                         <Text style={styles.headerName}>{recipientName}</Text>
-                        {isTyping && <Text style={styles.typingIndicator}>{t('chat.typing')}</Text>}
+                        {/* Real-time typing indicator */}
+                        {typingUsers.length > 0 && (
+                            <Text style={styles.typingIndicator}>
+                                {t('chat.typing')}
+                            </Text>
+                        )}
+                        {/* Online/Offline status text */}
+                        {!typingUsers.length && (
+                            <Text style={[styles.statusText, isRecipientOnline && styles.onlineText]}>
+                                {isRecipientOnline ? t('chat.online') : t('chat.offline')}
+                            </Text>
+                        )}
                     </View>
                 </View>
             ),
         });
-    }, [navigation, recipientName, recipientPhoto, isTyping, t]);
+    }, [navigation, recipientName, recipientPhoto, isRecipientOnline, typingUsers, t]);
 
     const handleSend = async () => {
         if (!inputText.trim()) return;
 
         const text = inputText;
         setInputText('');
+        
+        // Stop typing indicator
+        emitStopTyping();
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
 
         await sendMessage(text);
 
         // Scroll to bottom
         flatListRef.current?.scrollToEnd({ animated: true });
+    };
+
+    const handleInputChange = (text: string) => {
+        setInputText(text);
+        
+        // Emit typing indicator
+        if (text.trim()) {
+            emitStartTyping();
+            
+            // Auto-stop typing after 3 seconds
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            typingTimeoutRef.current = setTimeout(() => {
+                emitStopTyping();
+            }, 3000);
+        } else {
+            emitStopTyping();
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        }
     };
 
     const handleToggleTranslation = (messageId: string) => {
@@ -166,22 +226,40 @@ export function ChatScreen() {
 
             {/* Input Bar */}
             <View style={styles.inputBar}>
-                <TextInput
-                    style={styles.input}
-                    value={inputText}
-                    onChangeText={setInputText}
-                    placeholder={t('chat.type_message')}
-                    placeholderTextColor="#666"
-                    multiline
-                    maxLength={5000}
-                />
-                <TouchableOpacity
-                    style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
-                    onPress={handleSend}
-                    disabled={!inputText.trim() || isLoading}
-                >
-                    <Text style={styles.sendButtonText}>{t('chat.send')}</Text>
-                </TouchableOpacity>
+                {/* Connection status indicator */}
+                {!isConnected && (
+                    <View style={styles.offlineBar}>
+                        <Text style={styles.offlineText}>{t('chat.offline_mode')}</Text>
+                    </View>
+                )}
+                
+                {/* Typing indicator for recipient */}
+                {typingUsers.length > 0 && (
+                    <View style={styles.typingBubble}>
+                        <Text style={styles.typingBubbleText}>
+                            {recipientName} {t('chat.is_typing')}
+                        </Text>
+                    </View>
+                )}
+                
+                <View style={styles.inputRow}>
+                    <TextInput
+                        style={styles.input}
+                        value={inputText}
+                        onChangeText={handleInputChange}
+                        placeholder={t('chat.type_message')}
+                        placeholderTextColor="#666"
+                        multiline
+                        maxLength={5000}
+                    />
+                    <TouchableOpacity
+                        style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+                        onPress={handleSend}
+                        disabled={!inputText.trim() || isLoading}
+                    >
+                        <Text style={styles.sendButtonText}>{t('chat.send')}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -196,11 +274,25 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    avatarContainer: {
+        position: 'relative',
+        marginRight: 10,
+    },
     headerAvatar: {
         width: 36,
         height: 36,
         borderRadius: 18,
-        marginRight: 10,
+    },
+    onlineIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#4ADE80',
+        borderWidth: 2,
+        borderColor: '#0A0A0F',
     },
     headerName: {
         fontSize: 16,
@@ -210,6 +302,14 @@ const styles = StyleSheet.create({
     typingIndicator: {
         fontSize: 12,
         color: '#FF6B8A',
+        fontStyle: 'italic',
+    },
+    statusText: {
+        fontSize: 11,
+        color: '#666',
+    },
+    onlineText: {
+        color: '#4ADE80',
     },
     messageList: {
         padding: 16,
@@ -280,13 +380,40 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     inputBar: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        flexDirection: 'column',
+        alignItems: 'stretch',
         padding: 12,
         paddingBottom: 24,
         backgroundColor: '#1A1A24',
         borderTopWidth: 1,
         borderTopColor: '#2A2A3A',
+    },
+    offlineBar: {
+        backgroundColor: '#FFA500',
+        padding: 8,
+        marginBottom: 8,
+        borderRadius: 8,
+    },
+    offlineText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    typingBubble: {
+        backgroundColor: '#2A2A3A',
+        padding: 8,
+        marginBottom: 8,
+        borderRadius: 12,
+    },
+    typingBubbleText: {
+        color: '#FF6B8A',
+        fontSize: 12,
+        fontStyle: 'italic',
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
     },
     input: {
         flex: 1,

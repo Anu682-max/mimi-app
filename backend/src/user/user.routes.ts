@@ -93,6 +93,73 @@ userRouter.patch('/me', authMiddleware, async (req: Request, res: Response, next
 });
 
 /**
+ * POST /users/me/photo
+ * Add or update profile photo
+ * Expects uploaded image URL in body (from /media/upload)
+ */
+userRouter.post('/me/photo', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).userId;
+        const { photoUrl } = req.body;
+        const locale = req.locale;
+
+        if (!photoUrl) {
+            throw createError('Photo URL is required', 400, 'MISSING_PHOTO_URL');
+        }
+
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            throw createError('User not found', 404, 'NOT_FOUND');
+        }
+
+        // Add photo to photos array
+        if (!user.photos.includes(photoUrl)) {
+            user.photos.push(photoUrl);
+            await user.save();
+        }
+
+        res.json({
+            message: t('profile.photo_updated', locale) || 'Photo updated successfully',
+            photos: user.photos,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * DELETE /users/me/photo
+ * Remove a profile photo
+ */
+userRouter.delete('/me/photo', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).userId;
+        const { photoUrl } = req.body;
+        const locale = req.locale;
+
+        if (!photoUrl) {
+            throw createError('Photo URL is required', 400, 'MISSING_PHOTO_URL');
+        }
+
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            throw createError('User not found', 404, 'NOT_FOUND');
+        }
+
+        // Remove photo from photos array
+        user.photos = user.photos.filter(photo => photo !== photoUrl);
+        await user.save();
+
+        res.json({
+            message: t('profile.photo_removed', locale) || 'Photo removed successfully',
+            photos: user.photos,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
  * PUT /users/me/locale
  * Update user's locale preference
  */

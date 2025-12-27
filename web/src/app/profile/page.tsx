@@ -255,27 +255,14 @@ export default function ProfilePage() {
                     <div className="bg-[#13131a] border border-gray-800 rounded-xl p-6">
                         <label className="block text-sm font-medium mb-4">Profile Photos</label>
                         
-                        {/* Cloudinary not configured notice */}
-                        <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                            <div className="flex items-start gap-3">
-                                <span className="text-2xl">📸</span>
-                                <div className="flex-1">
-                                    <h3 className="text-yellow-500 font-medium mb-1">Photo Upload Temporarily Disabled</h3>
-                                    <p className="text-sm text-gray-400 mb-2">
-                                        To enable photo uploads, configure Cloudinary in your backend settings.
-                                    </p>
-                                    <details className="text-xs text-gray-500">
-                                        <summary className="cursor-pointer hover:text-gray-400">Show setup instructions</summary>
-                                        <ol className="mt-2 ml-4 list-decimal space-y-1">
-                                            <li>Create free account at <a href="https://cloudinary.com/users/register_free" target="_blank" className="text-pink-500 hover:underline">cloudinary.com</a></li>
-                                            <li>Copy credentials from Dashboard</li>
-                                            <li>Update backend/.env file with your credentials</li>
-                                            <li>Restart backend server</li>
-                                        </ol>
-                                    </details>
+                        {isUploading && (
+                            <div className="mb-4 p-4 bg-pink-500/10 border border-pink-500/30 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-pink-500"></div>
+                                    <span className="text-sm text-gray-400">Uploading photo...</span>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <input
                             type="file"
@@ -283,11 +270,10 @@ export default function ProfilePage() {
                             onChange={handlePhotoUpload}
                             accept="image/*"
                             className="hidden"
-                            disabled
                         />
-                        <div className="grid grid-cols-3 gap-4 opacity-50 pointer-events-none">
+                        <div className="grid grid-cols-3 gap-4">
                             {profile.photos.map((photo, index) => (
-                                <div key={index} className="relative aspect-square">
+                                <div key={index} className="relative aspect-square group">
                                     <img
                                         src={photo}
                                         alt={`Photo ${index + 1}`}
@@ -295,8 +281,7 @@ export default function ProfilePage() {
                                     />
                                     <button
                                         onClick={() => handlePhotoDelete(photo)}
-                                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full transition"
-                                        disabled
+                                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full transition opacity-0 group-hover:opacity-100"
                                     >
                                         <XMarkIcon className="w-4 h-4" />
                                     </button>
@@ -309,15 +294,18 @@ export default function ProfilePage() {
                             ))}
                             {profile.photos.length < 6 && (
                                 <button
-                                    disabled
-                                    className="aspect-square border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center gap-2 cursor-not-allowed"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isUploading}
+                                    className="aspect-square border-2 border-dashed border-gray-700 hover:border-pink-500 rounded-lg flex flex-col items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pink-500/5"
                                 >
-                                    <PlusIcon className="w-8 h-8 text-gray-600" />
-                                    <span className="text-xs text-gray-600">Add Photo</span>
+                                    <PlusIcon className="w-8 h-8 text-gray-400" />
+                                    <span className="text-xs text-gray-400">Add Photo</span>
                                 </button>
                             )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">📷 Photo uploads will be enabled after Cloudinary setup.</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                            📷 Upload up to 6 photos. First photo will be your main profile picture.
+                        </p>
                     </div>
 
                     {/* Basic Info */}

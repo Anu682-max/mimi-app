@@ -7,10 +7,12 @@ import {
     Image,
     TouchableOpacity,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import { API_URL } from '../config';
 
@@ -33,10 +35,22 @@ export default function ProfileScreen() {
 
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         fetchProfile();
+        requestPermissions();
     }, []);
+
+    const requestPermissions = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert(
+                'Permission Required',
+                'We need permission to access your photos to upload profile pictures.'
+            );
+        }
+    };
 
     const fetchProfile = async () => {
         try {
@@ -51,6 +65,87 @@ export default function ProfileScreen() {
             console.error('Failed to fetch profile:', error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                await uploadImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert('Error', 'Failed to pick image');
+        }
+    };
+
+    const uploadImage = async (imageUri: string) => {
+        setIsUploading(true);
+        try {
+            // Create form data
+            const formData = new FormData();
+            const filename = imageUri.split('/').pop() || 'photo.jpg';
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+            formData.append('image', {
+                uri: imageUri,
+                name: filename,
+                type,
+            } as any);
+
+            // Upload to backend
+            const uploadResponse = await fetch(`${API_URL}/api/v1/media/upload`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const uploadData = await uploadResponse.json();
+
+            if (!uploadResponse.ok) {
+                throw new Error(uploadData.message || 'Upload failed');
+            }
+
+            const imageUrl = uploadData.data.url;
+
+            // Add photo to profile
+            const updateResponse = await fetch(`${API_URL}/api/v1/users/me/photo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ photoUrl: imageUrl }),
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('Failed to update profile');
+            }
+
+            const updateData = await updateResponse.json();
+
+            // Update local state
+            setProfile(prev => prev ? {
+                ...prev,
+                photos: updateData.photos || [...prev.photos, imageUrl]
+            } : null);
+
+            Alert.alert('Success', 'Photo uploaded successfully!');
+        } catch (error) {
+            console.error('Upload error:', error);
+            Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload photo');
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -75,18 +170,32 @@ export default function ProfileScreen() {
 
                 {/* Profile Photo */}
                 <View style={styles.photoSection}>
-                    {profile?.photos && profile.photos.length > 0 ? (
-                        <Image
-                            source={{ uri: profile.photos[0] }}
-                            style={styles.profilePhoto}
-                        />
-                    ) : (
-                        <View style={styles.photoPlaceholder}>
-                            <Text style={styles.photoPlaceholderText}>
-                                {profile?.firstName?.[0] || '?'}
-                            </Text>
+                    <TouchableOpacity 
+                        onPress={pickImage}
+                        disabled={isUploading}
+                        style={styles.photoContainer}
+                    >
+                        {profile?.photos && profile.photos.length > 0 ? (
+                            <Image
+                                source={{ uri: profile.photos[0] }}
+                                style={styles.profilePhoto}
+                            />
+                        ) : (
+                            <View style={styles.photoPlaceholder}>
+                                <Text style={styles.photoPlaceholderText}>
+                                    {profile?.firstName?.[0] || '?'}
+                                </Text>
+                            </View>
+                        )}
+                        <View style={styles.cameraButton}>
+                            <Text style={styles.cameraIcon}>📷</Text>
                         </View>
-                    )}
+                        {isUploading && (
+                            <View style={styles.uploadingOverlay}>
+                                <ActivityIndicator size="large" color="#EC4899" />
+                            </View>
+                        )}
+                    </TouchableOpacity>
                     <View style={styles.nameSection}>
                         <Text style={styles.name}>
                             {profile?.firstName} {profile?.lastName}
@@ -134,7 +243,10 @@ export default function ProfileScreen() {
                 )}
 
                 {/* Edit Profile Button */}
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => navigation.navigate('EditProfile')}
+                >
                     <Text style={styles.editButtonText}>{t('profile.edit_profile')}</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -174,11 +286,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 24,
     },
+    photoContainer: {
+        position: 'relative',
+        marginBottom: 16,
+    },
     profilePhoto: {
         width: 150,
         height: 150,
         borderRadius: 75,
-        marginBottom: 16,
     },
     photoPlaceholder: {
         width: 150,
@@ -187,12 +302,38 @@ const styles = StyleSheet.create({
         backgroundColor: '#EC4899',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
     },
     photoPlaceholderText: {
         fontSize: 64,
         fontWeight: 'bold',
         color: '#FFF',
+    },
+    cameraButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#EC4899',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: '#0A0A0F',
+    },
+    cameraIcon: {
+        fontSize: 20,
+    },
+    uploadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 75,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     nameSection: {
         flexDirection: 'row',

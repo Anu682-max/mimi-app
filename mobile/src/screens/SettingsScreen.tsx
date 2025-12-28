@@ -73,6 +73,14 @@ export default function SettingsScreen() {
                             thumbColor="#FFF"
                         />
                     </View>
+
+                    <TouchableOpacity 
+                        style={styles.settingItem}
+                        onPress={() => (navigation as any).navigate('NotificationTest')}
+                    >
+                        <Text style={styles.settingText}>🔔 Test Notifications</Text>
+                        <Text style={styles.settingArrow}>›</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Privacy Section */}

@@ -9,6 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 
 import i18n from './src/i18n';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { NotificationProvider } from './src/contexts/NotificationContext';
 
 // Screens
 import LoginScreen from './src/screens/LoginScreen';
@@ -18,6 +19,9 @@ import ChatListScreen from './src/screens/ChatListScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import NotificationTestScreen from './src/screens/NotificationTestScreen';
+import RestaurantsScreen from './src/screens/RestaurantsScreen';
+import RestaurantDetailScreen from './src/screens/RestaurantDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,6 +46,14 @@ function MainTabs() {
                 options={{
                     tabBarLabel: 'さがす',
                     tabBarIcon: ({ color }) => <TabIcon name="heart" color={color} />,
+                }}
+            />
+            <Tab.Screen
+                name="Restaurants"
+                component={RestaurantsScreen}
+                options={{
+                    tabBarLabel: 'Ресторан',
+                    tabBarIcon: ({ color }) => <TabIcon name="restaurant" color={color} />,
                 }}
             />
             <Tab.Screen
@@ -70,12 +82,9 @@ function TabIcon({ name, color }: { name: string; color: string }) {
         heart: '💕',
         chat: '💬',
         user: '👤',
+        restaurant: '🍽️',
     };
-    return (
-        <React.Fragment>
-            {/* Using emoji as placeholder, replace with proper icons */}
-        </React.Fragment>
-    );
+    return <Text style={{ fontSize: 22, color }}>{icons[name] || '❓'}</Text>;
 }
 
 function AppNavigator() {
@@ -97,6 +106,8 @@ function AppNavigator() {
                     <Stack.Screen name="Main" component={MainTabs} />
                     <Stack.Screen name="Chat" component={ChatScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
+                    <Stack.Screen name="NotificationTest" component={NotificationTestScreen} />
+                    <Stack.Screen name="RestaurantDetail" component={RestaurantDetailScreen} />
                 </>
             ) : (
                 <>
@@ -113,10 +124,12 @@ export default function App() {
         <SafeAreaProvider>
             <I18nextProvider i18n={i18n}>
                 <AuthProvider>
-                    <NavigationContainer>
-                        <StatusBar style="light" />
-                        <AppNavigator />
-                    </NavigationContainer>
+                    <NotificationProvider>
+                        <NavigationContainer>
+                            <StatusBar style="light" />
+                            <AppNavigator />
+                        </NavigationContainer>
+                    </NotificationProvider>
                 </AuthProvider>
             </I18nextProvider>
         </SafeAreaProvider>

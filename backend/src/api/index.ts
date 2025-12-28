@@ -904,6 +904,22 @@ pushSubscriptionSchema.index({ userId: 1, endpoint: 1 }, { unique: true });
 
 const PushSubscription = mongoose.models.PushSubscription || mongoose.model('PushSubscription', pushSubscriptionSchema);
 
+// Expo Push Token Schema (for mobile)
+const expoPushTokenSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    expoPushToken: { type: String, required: true },
+    deviceInfo: {
+        platform: String,
+        deviceName: String,
+        osVersion: String,
+    },
+    createdAt: { type: Date, default: Date.now },
+});
+
+expoPushTokenSchema.index({ userId: 1, expoPushToken: 1 }, { unique: true });
+
+const ExpoPushToken = mongoose.models.ExpoPushToken || mongoose.model('ExpoPushToken', expoPushTokenSchema);
+
 // Get VAPID public key
 app.get(`${apiPrefix}/notifications/vapid-key`, (_req: Request, res: Response): void => {
     const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
@@ -965,6 +981,52 @@ app.post(`${apiPrefix}/notifications/subscribe`, async (req: Request, res: Respo
     }
 });
 
+// Subscribe to Expo push notifications (mobile)
+app.post(`${apiPrefix}/notifications/subscribe/expo`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    const { expoPushToken, deviceInfo } = req.body;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
+    if (!expoPushToken) {
+        res.status(400).json({ success: false, error: 'Expo push token required' });
+        return;
+    }
+
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+        res.status(500).json({ success: false, error: 'Database connection failed' });
+        return;
+    }
+
+    try {
+        const token = authHeader.split(' ')[1];
+        const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+
+        // Upsert Expo push token
+        await ExpoPushToken.findOneAndUpdate(
+            { userId: decoded.userId, expoPushToken },
+            {
+                userId: decoded.userId,
+                expoPushToken,
+                deviceInfo,
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Subscribed to Expo push notifications',
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Subscription failed' });
+    }
+});
+
 // Unsubscribe from push notifications
 app.post(`${apiPrefix}/notifications/unsubscribe`, async (req: Request, res: Response): Promise<void> => {
     const authHeader = req.headers.authorization;
@@ -997,19 +1059,40 @@ app.post(`${apiPrefix}/notifications/unsubscribe`, async (req: Request, res: Res
     }
 });
 
-// Send notification to user (internal use)
+// Send notification to user (or self for testing)
 app.post(`${apiPrefix}/notifications/send`, async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
     const { userId, title, body, url } = req.body;
+
+    // Either authenticated user (can send to themselves) OR admin key required
+    let targetUserId: string | undefined;
     const adminKey = req.headers['x-admin-key'];
 
-    // Simple admin key check for internal use
-    if (adminKey !== process.env.ADMIN_API_KEY) {
-        res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (adminKey === process.env.ADMIN_API_KEY) {
+        // Admin can send to any user
+        if (!userId) {
+            res.status(400).json({ success: false, error: 'userId required when using admin key' });
+            return;
+        }
+        targetUserId = userId;
+    } else if (authHeader && authHeader.startsWith('Bearer ')) {
+        // Authenticated users can send test notifications to themselves
+        try {
+            const token = authHeader.split(' ')[1];
+            const jwtSecret = process.env.JWT_SECRET || config.jwt.secret;
+            const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+            targetUserId = userId || decoded.userId; // Use provided userId or own userId
+        } catch (error) {
+            res.status(401).json({ success: false, error: 'Invalid token' });
+            return;
+        }
+    } else {
+        res.status(401).json({ success: false, error: 'Unauthorized - token or admin key required' });
         return;
     }
 
-    if (!userId || !title || !body) {
-        res.status(400).json({ success: false, error: 'userId, title, and body required' });
+    if (!title || !body) {
+        res.status(400).json({ success: false, error: 'title and body required' });
         return;
     }
 
@@ -1020,53 +1103,87 @@ app.post(`${apiPrefix}/notifications/send`, async (req: Request, res: Response):
     }
 
     try {
-        const subscriptions = await PushSubscription.find({ userId }).lean();
+        // Get both web and mobile subscriptions
+        const webSubscriptions = await PushSubscription.find({ userId: targetUserId }).lean();
+        const expoTokens = await ExpoPushToken.find({ userId: targetUserId }).lean();
 
-        if (subscriptions.length === 0) {
+        if (webSubscriptions.length === 0 && expoTokens.length === 0) {
             res.json({ success: true, sent: 0, message: 'No subscriptions found' });
             return;
         }
 
-        const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-        const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-        const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@indate.com';
+        let totalSent = 0;
 
-        if (!vapidPublicKey || !vapidPrivateKey) {
-            res.status(500).json({ success: false, error: 'VAPID not configured' });
-            return;
+        // Send web push notifications
+        if (webSubscriptions.length > 0) {
+            const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+            const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+            const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@indate.com';
+
+            if (vapidPublicKey && vapidPrivateKey) {
+                const webpush = await import('web-push');
+                webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+
+                const payload = JSON.stringify({
+                    title,
+                    body,
+                    url: url || '/dashboard',
+                    icon: '/icon-192.png',
+                });
+
+                for (const sub of webSubscriptions) {
+                    try {
+                        await webpush.sendNotification({
+                            endpoint: sub.endpoint,
+                            keys: sub.keys as { p256dh: string; auth: string },
+                        }, payload);
+                        totalSent++;
+                    } catch (err: any) {
+                        if (err.statusCode === 410 || err.statusCode === 404) {
+                            await PushSubscription.deleteOne({ _id: sub._id });
+                        }
+                    }
+                }
+            }
         }
 
-        // Dynamic import for web-push (ES module compatibility)
-        const webpush = await import('web-push');
-        webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+        // Send Expo push notifications
+        if (expoTokens.length > 0) {
+            const Expo = (await import('expo-server-sdk')).default;
+            const expo = new Expo();
 
-        const payload = JSON.stringify({
-            title,
-            body,
-            url: url || '/dashboard',
-            icon: '/icon-192.png',
-        });
+            const messages: any[] = [];
 
-        let sent = 0;
-        for (const sub of subscriptions) {
-            try {
-                await webpush.sendNotification({
-                    endpoint: sub.endpoint,
-                    keys: sub.keys as { p256dh: string; auth: string },
-                }, payload);
-                sent++;
-            } catch (err: any) {
-                // Remove invalid subscription
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    await PushSubscription.deleteOne({ _id: sub._id });
+            for (const tokenDoc of expoTokens) {
+                if (Expo.isExpoPushToken(tokenDoc.expoPushToken)) {
+                    messages.push({
+                        to: tokenDoc.expoPushToken,
+                        sound: 'default',
+                        title,
+                        body,
+                        data: { url: url || '/dashboard' },
+                    });
+                }
+            }
+
+            if (messages.length > 0) {
+                const chunks = expo.chunkPushNotifications(messages);
+                
+                for (const chunk of chunks) {
+                    try {
+                        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+                        totalSent += ticketChunk.filter((ticket: any) => ticket.status === 'ok').length;
+                    } catch (error) {
+                        console.error('Error sending Expo notifications:', error);
+                    }
                 }
             }
         }
 
         res.json({
             success: true,
-            sent,
-            total: subscriptions.length,
+            sent: totalSent,
+            total: webSubscriptions.length + expoTokens.length,
         });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Send failed' });
@@ -1080,6 +1197,12 @@ app.use(`${apiPrefix}/email`, emailRoutes);
 // Media/Image Upload Routes
 import mediaRoutes from '../media/media.routes';
 app.use(`${apiPrefix}/media`, mediaRoutes);
+
+// Restaurant Routes
+import restaurantRoutes from '../restaurant/restaurant.routes';
+import orderRoutes from '../restaurant/order.routes';
+app.use(`${apiPrefix}/restaurants`, restaurantRoutes);
+app.use(`${apiPrefix}/orders`, orderRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response): void => {

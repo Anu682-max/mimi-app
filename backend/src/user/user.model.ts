@@ -48,6 +48,9 @@ export interface IUser extends Document {
     verificationStatus: 'none' | 'pending' | 'approved' | 'rejected';
     verificationPhotos?: string[];
 
+    // Restaurant role (optional)
+    restaurantRole?: 'customer' | 'restaurant_owner' | 'admin';
+
     // Status
     isActive: boolean;
     isOnline: boolean;
@@ -167,6 +170,13 @@ const userSchema = new Schema<IUser>(
             default: 'none',
         },
         verificationPhotos: [String],
+
+        // Restaurant role (optional - for restaurant ordering feature)
+        restaurantRole: {
+            type: String,
+            enum: ['customer', 'restaurant_owner', 'admin'],
+            default: 'customer',
+        },
 
         // Status
         isActive: {

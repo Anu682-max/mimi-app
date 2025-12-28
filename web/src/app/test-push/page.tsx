@@ -19,17 +19,23 @@ export default function TestPushPage() {
 
         try {
             const token = localStorage.getItem('token');
+            
+            if (!token) {
+                setTestResult('❌ Please login first');
+                setSending(false);
+                return;
+            }
+
             const response = await fetch('http://localhost:3699/api/v1/notifications/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token && { Authorization: `Bearer ${token}` }),
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     title: '💕 New Match!',
                     body: 'You have a new match! Say hello 👋',
-                    icon: '/icon-192x192.png',
-                    badge: '/badge-72x72.png',
+                    url: '/dashboard',
                 }),
             });
 

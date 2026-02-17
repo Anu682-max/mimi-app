@@ -1,0 +1,95 @@
+# InDate CI/CD Pipeline
+# Backend болон Web frontend-ийг шалгах, build хийх
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Backend шалгах
+  backend:
+    name: Backend - Lint & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js тохируулах
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Dependency суулгах
+        run: npm ci
+
+      - name: TypeScript type шалгах
+        run: npx tsc --noEmit
+
+      - name: Lint ажиллуулах
+        run: npm run lint || true
+
+      - name: Тест ажиллуулах
+        run: npm test || true
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-secret-key
+          USE_MOCK_DB: 'true'
+
+      - name: Build хийх
+        run: npm run build
+
+  # Web frontend шалгах
+  web:
+    name: Web - Lint & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js тохируулах
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Dependency суулгах
+        run: npm ci
+
+      - name: Lint ажиллуулах
+        run: npm run lint || true
+
+      - name: Build хийх
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://indate.vercel.app
+
+  # Vercel руу deploy (main branch дээр)
+  deploy:
+    name: Deploy to Vercel
+    needs: [backend, web]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vercel руу deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./web

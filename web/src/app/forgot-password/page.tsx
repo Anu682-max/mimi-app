@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
             {/* Moving Orbs - Smaller on mobile */}
             <div className="absolute top-[-10%] right-[-5%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-purple-600/30 rounded-full blur-[80px] sm:blur-[120px] animate-float z-0" />
             <div className="absolute bottom-[-10%] left-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-blue-600/20 rounded-full blur-[80px] sm:blur-[120px] animate-float-delayed z-0" />
-            <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-pink-500/10 rounded-full blur-[60px] sm:blur-[100px] z-0" />
+            <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-[#FF4458]/10 rounded-full blur-[60px] sm:blur-[100px] z-0" />
 
             <div className="w-full max-w-md z-10 relative">
                 {/* Back Button */}

@@ -37,7 +37,7 @@ export default function SecretSenderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F0F2F4] flex items-center justify-center p-4">
       {/* Back Button */}
       <button
         onClick={() => router.back()}
@@ -58,7 +58,7 @@ export default function SecretSenderPage() {
             </div>
 
             {/* Heart Card */}
-            <div className="relative bg-gradient-to-br from-pink-400 via-red-400 to-rose-500 rounded-3xl p-8 mb-6 shadow-xl overflow-hidden">
+            <div className="relative bg-gradient-to-br from-[#FD267A] via-[#FF4458] to-[#FF6036] rounded-3xl p-8 mb-6 shadow-xl overflow-hidden">
               <div className="absolute top-4 right-4 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                 <HeartIcon className="w-7 h-7 text-white" />
               </div>
@@ -143,7 +143,7 @@ export default function SecretSenderPage() {
 
         {/* Reveal Screen */}
         {step === 'reveal' && (
-          <div className="relative h-[600px] bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative h-[600px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl overflow-hidden shadow-2xl">
             {/* Floating Hearts Animation */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-pulse">
@@ -197,7 +197,7 @@ export default function SecretSenderPage() {
 
       {/* Decorative Elements */}
       <div className="fixed top-10 right-10 opacity-20">
-        <SparklesIcon className="w-16 h-16 text-pink-500 animate-pulse" />
+        <SparklesIcon className="w-16 h-16 text-[#FF4458] animate-pulse" />
       </div>
       <div className="fixed bottom-10 left-10 opacity-20">
         <SparklesIcon className="w-20 h-20 text-purple-500 animate-pulse delay-500" />

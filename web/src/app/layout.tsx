@@ -13,19 +13,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "InDate - AI Dating App",
+  title: "mimi - AI Dating App",
   description: "Find your perfect match with AI-powered dating and real-time translation",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "InDate",
+    statusBarStyle: "default",
+    title: "mimi",
   },
-  applicationName: "InDate",
+  applicationName: "mimi",
   keywords: ["dating", "ai", "chat", "translation", "matches"],
-  authors: [{ name: "InDate Team" }],
-  creator: "InDate",
-  publisher: "InDate",
+  authors: [{ name: "mimi Team" }],
+  creator: "mimi",
+  publisher: "mimi",
   formatDetection: {
     telephone: false,
   },
@@ -46,7 +46,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#8b5cf6",
+  themeColor: "#FF4458",
 };
 
 
@@ -56,9 +56,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${inter.variable} font-sans antialiased bg-[#0A0A0F] text-white min-h-screen`}
+        className={`${inter.variable} font-sans antialiased bg-white text-[#21262E] min-h-screen`}
       >
         <Providers>
           {children}

@@ -21,6 +21,8 @@ export interface CreateUserDTO {
     locale?: string;
     timezone?: string;
     region?: string;
+    photos?: string[];
+    isVerified?: boolean;
     location?: {
         type: 'Point';
         coordinates: [number, number];
@@ -41,6 +43,8 @@ export interface UpdateUserDTO {
     };
     city?: string;
     country?: string;
+    isVerified?: boolean;
+    passwordHash?: string;
 }
 
 export interface FindNearbyOptions {

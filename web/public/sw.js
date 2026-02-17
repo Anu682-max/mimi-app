@@ -1,4 +1,4 @@
-// InDate PWA Service Worker
+// mimi PWA Service Worker
 const CACHE_NAME = 'indate-v1';
 const OFFLINE_URL = '/offline.html';
 
@@ -104,11 +104,11 @@ self.addEventListener('push', (event) => {
         try {
             data = event.data.json();
         } catch (e) {
-            data = { title: 'InDate', body: event.data.text() };
+            data = { title: 'mimi', body: event.data.text() };
         }
     }
 
-    const title = data.title || 'InDate';
+    const title = data.title || 'mimi';
     const options = {
         body: data.body || 'You have a new notification',
         icon: '/icons/icon-192x192.png',

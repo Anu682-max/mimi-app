@@ -58,7 +58,7 @@
         "profile_updated": "Профайл амжилттай шинэчлэгдлээ"
     },
     "onboarding": {
-        "welcome": "InDate-д тавтай морил",
+        "welcome": "mimi-д тавтай морил",
         "tagline": "AI-аар төгс хосоо олоорой",
         "step_basics": "Үндсэн мэдээлэл",
         "step_photos": "Зураг нэмэх",
@@ -125,7 +125,7 @@
         "change_language": "Хэл солих",
         "dark_mode": "Харанхуй горим",
         "discovery_settings": "Хайлтын тохиргоо",
-        "show_me_on_app": "InDate дээр харуулах",
+        "show_me_on_app": "mimi дээр харуулах",
         "distance_preference": "Хамгийн их зай",
         "age_range_preference": "Насны хязгаар",
         "help_support": "Тусламж",

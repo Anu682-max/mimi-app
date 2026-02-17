@@ -107,20 +107,21 @@ userRouter.post('/me/photo', authMiddleware, async (req: Request, res: Response,
             throw createError('Photo URL is required', 400, 'MISSING_PHOTO_URL');
         }
 
-        const user = await userRepository.findById(userId);
+        const user = await userRepository.getById(userId);
         if (!user) {
             throw createError('User not found', 404, 'NOT_FOUND');
         }
 
-        // Add photo to photos array
-        if (!user.photos.includes(photoUrl)) {
-            user.photos.push(photoUrl);
-            await user.save();
+        // Зураг нэмэх
+        const photos = user.photos || [];
+        if (!photos.includes(photoUrl)) {
+            photos.push(photoUrl);
+            await userRepository.update(userId, { photos });
         }
 
         res.json({
             message: t('profile.photo_updated', locale) || 'Photo updated successfully',
-            photos: user.photos,
+            photos,
         });
     } catch (error) {
         next(error);
@@ -141,18 +142,18 @@ userRouter.delete('/me/photo', authMiddleware, async (req: Request, res: Respons
             throw createError('Photo URL is required', 400, 'MISSING_PHOTO_URL');
         }
 
-        const user = await userRepository.findById(userId);
+        const user = await userRepository.getById(userId);
         if (!user) {
             throw createError('User not found', 404, 'NOT_FOUND');
         }
 
-        // Remove photo from photos array
-        user.photos = user.photos.filter(photo => photo !== photoUrl);
-        await user.save();
+        // Зураг устгах
+        const photos = (user.photos || []).filter((photo: string) => photo !== photoUrl);
+        await userRepository.update(userId, { photos });
 
         res.json({
             message: t('profile.photo_removed', locale) || 'Photo removed successfully',
-            photos: user.photos,
+            photos,
         });
     } catch (error) {
         next(error);

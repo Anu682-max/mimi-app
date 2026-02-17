@@ -108,6 +108,37 @@ export class SocketService {
             });
         });
 
+        // WebRTC signaling event-үүд
+        socket.on('webrtc_offer', (data: { targetUserId: string; offer: any; callId: string; type: string }) => {
+            this.emitToUser(data.targetUserId, 'incoming_call', {
+                callId: data.callId,
+                callerId: userId,
+                type: data.type,
+                offer: data.offer,
+            });
+        });
+
+        socket.on('webrtc_answer', (data: { targetUserId: string; answer: any; callId: string }) => {
+            this.emitToUser(data.targetUserId, 'call_answered', {
+                callId: data.callId,
+                answer: data.answer,
+            });
+        });
+
+        socket.on('webrtc_ice_candidate', (data: { targetUserId: string; candidate: any; callId: string }) => {
+            this.emitToUser(data.targetUserId, 'ice_candidate', {
+                callId: data.callId,
+                candidate: data.candidate,
+            });
+        });
+
+        socket.on('webrtc_end_call', (data: { targetUserId: string; callId: string; reason?: string }) => {
+            this.emitToUser(data.targetUserId, 'call_ended', {
+                callId: data.callId,
+                reason: data.reason || 'ended',
+            });
+        });
+
         socket.on('disconnect', async () => {
             this.handleDisconnect(socket, userId);
         });

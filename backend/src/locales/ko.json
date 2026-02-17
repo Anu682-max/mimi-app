@@ -58,7 +58,7 @@
         "profile_updated": "프로필이 업데이트되었습니다"
     },
     "onboarding": {
-        "welcome": "InDate에 오신 것을 환영합니다",
+        "welcome": "mimi에 오신 것을 환영합니다",
         "tagline": "AI로 완벽한 매칭을 찾아보세요",
         "step_basics": "기본 정보",
         "step_photos": "사진 추가",
@@ -125,7 +125,7 @@
         "change_language": "언어 변경",
         "dark_mode": "다크 모드",
         "discovery_settings": "검색 설정",
-        "show_me_on_app": "InDate에 표시",
+        "show_me_on_app": "mimi에 표시",
         "distance_preference": "최대 거리",
         "age_range_preference": "나이 범위",
         "help_support": "도움말 및 지원",

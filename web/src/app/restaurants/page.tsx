@@ -46,7 +46,7 @@ export default function RestaurantsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF4458]"></div>
             </div>
         );
     }
@@ -82,7 +82,7 @@ export default function RestaurantsPage() {
                                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden"
                             >
                                 {/* Restaurant Image Placeholder */}
-                                <div className="h-48 bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center">
+                                <div className="h-48 bg-gradient-to-br from-[#FD267A] to-[#FF6036] flex items-center justify-center">
                                     <span className="text-6xl">🍔</span>
                                 </div>
 
@@ -113,7 +113,7 @@ export default function RestaurantsPage() {
                                         </div>
                                     </div>
 
-                                    <button className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <button className="mt-4 w-full bg-[#FF4458] hover:bg-[#FF4458]/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
                                         Цэс үзэх
                                     </button>
                                 </div>

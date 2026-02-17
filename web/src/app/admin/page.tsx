@@ -105,10 +105,10 @@ export default function AdminPanel() {
     const statCards = [
         { label: 'Total Users', value: stats.totalUsers, icon: UsersIcon, color: 'from-blue-500 to-cyan-500' },
         { label: 'Active Users', value: stats.activeUsers, icon: ShieldCheckIcon, color: 'from-green-500 to-emerald-500' },
-        { label: 'Total Matches', value: stats.totalMatches, icon: HeartIcon, color: 'from-pink-500 to-rose-500' },
+        { label: 'Total Matches', value: stats.totalMatches, icon: HeartIcon, color: 'from-[#FD267A] to-[#FF6036]' },
         { label: 'Messages', value: stats.totalMessages, icon: ChatBubbleLeftRightIcon, color: 'from-purple-500 to-indigo-500' },
         { label: 'New Today', value: stats.newUsersToday, icon: ChartBarIcon, color: 'from-orange-500 to-amber-500' },
-        { label: 'Reports', value: stats.reportedUsers, icon: ExclamationTriangleIcon, color: 'from-red-500 to-rose-500' },
+        { label: 'Reports', value: stats.reportedUsers, icon: ExclamationTriangleIcon, color: 'from-red-500 to-[#FF4458]' },
     ];
 
     return (
@@ -116,7 +116,8 @@ export default function AdminPanel() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold bg-linear-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                    {/* Админ хуудасны гарчиг */}
+                    <h1 className="text-4xl font-bold bg-linear-to-r from-[#FD267A] to-[#FF6036] bg-clip-text text-transparent">
                         Admin Panel
                     </h1>
                     <p className="text-gray-400 mt-2">Manage users, monitor activity, and handle reports</p>
@@ -129,7 +130,7 @@ export default function AdminPanel() {
                             onClick={() => setSelectedTab('overview')}
                             className={`pb-4 px-2 border-b-2 font-medium transition-colors ${
                                 selectedTab === 'overview'
-                                    ? 'border-pink-500 text-pink-500'
+                                    ? 'border-[#FF4458] text-[#FF4458]'
                                     : 'border-transparent text-gray-400 hover:text-white'
                             }`}
                         >
@@ -139,7 +140,7 @@ export default function AdminPanel() {
                             onClick={() => setSelectedTab('users')}
                             className={`pb-4 px-2 border-b-2 font-medium transition-colors ${
                                 selectedTab === 'users'
-                                    ? 'border-pink-500 text-pink-500'
+                                    ? 'border-[#FF4458] text-[#FF4458]'
                                     : 'border-transparent text-gray-400 hover:text-white'
                             }`}
                         >
@@ -149,7 +150,7 @@ export default function AdminPanel() {
                             onClick={() => setSelectedTab('reports')}
                             className={`pb-4 px-2 border-b-2 font-medium transition-colors ${
                                 selectedTab === 'reports'
-                                    ? 'border-pink-500 text-pink-500'
+                                    ? 'border-[#FF4458] text-[#FF4458]'
                                     : 'border-transparent text-gray-400 hover:text-white'
                             }`}
                         >
@@ -215,7 +216,7 @@ export default function AdminPanel() {
                             <input
                                 type="text"
                                 placeholder="Search users..."
-                                className="px-4 py-2 bg-[#0a0a0f] border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-pink-500"
+                                className="px-4 py-2 bg-[#0a0a0f] border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4458]"
                             />
                         </div>
                         <div className="overflow-x-auto">
@@ -235,7 +236,7 @@ export default function AdminPanel() {
                                         <tr key={user.id} className="border-b border-gray-800 hover:bg-gray-900/50">
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center">
-                                                    <div className="w-10 h-10 rounded-full bg-linear-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold mr-3">
+                                                    <div className="w-10 h-10 rounded-full bg-linear-to-r from-[#FD267A] to-[#FF6036] flex items-center justify-center text-white font-bold mr-3">
                                                         {user.firstName.charAt(0)}
                                                     </div>
                                                     <div>

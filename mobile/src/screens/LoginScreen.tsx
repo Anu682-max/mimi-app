@@ -51,7 +51,7 @@ export default function LoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     {/* Logo */}
-                    <Text style={styles.logo}>InDate</Text>
+                    <Text style={styles.logo}>mimi</Text>
                     <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
 
                     {/* Error */}

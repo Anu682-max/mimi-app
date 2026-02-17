@@ -107,7 +107,7 @@ export default function MyOrdersPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF4458]"></div>
             </div>
         );
     }
@@ -140,7 +140,7 @@ export default function MyOrdersPage() {
                         <p className="text-gray-500 text-lg mb-4">Танд одоогоор захиалга байхгүй байна</p>
                         <button
                             onClick={() => router.push('/restaurants')}
-                            className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold"
+                            className="bg-[#FF4458] hover:bg-[#FF4458]/90 text-white px-6 py-2 rounded-lg font-semibold"
                         >
                             Рестораны жагсаалт руу очих
                         </button>
@@ -150,11 +150,11 @@ export default function MyOrdersPage() {
                         {orders.map((order) => (
                             <div key={order._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                                 {/* Order Header */}
-                                <div className="bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-4 text-white">
+                                <div className="bg-gradient-to-r from-[#FD267A] to-[#FF6036] px-6 py-4 text-white">
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h3 className="text-xl font-bold">{order.restaurant.name}</h3>
-                                            <p className="text-pink-100 text-sm mt-1">
+                                            <p className="text-gray-100 text-sm mt-1">
                                                 {new Date(order.createdAt).toLocaleString('mn-MN')}
                                             </p>
                                         </div>
@@ -197,7 +197,7 @@ export default function MyOrdersPage() {
                                     {/* Total */}
                                     <div className="flex justify-between items-center text-lg font-bold">
                                         <span>Нийт дүн:</span>
-                                        <span className="text-pink-600 text-2xl">{order.totalAmount.toLocaleString()}₮</span>
+                                        <span className="text-[#FF4458] text-2xl">{order.totalAmount.toLocaleString()}₮</span>
                                     </div>
 
                                     {/* Actions */}

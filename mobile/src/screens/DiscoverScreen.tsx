@@ -171,7 +171,7 @@ export default function DiscoverScreen() {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.logo}>InDate</Text>
+                <Text style={styles.logo}>mimi</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
                     <Text style={styles.settingsIcon}>⚙️</Text>
                 </TouchableOpacity>

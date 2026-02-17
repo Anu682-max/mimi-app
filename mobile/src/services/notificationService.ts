@@ -112,7 +112,7 @@ class NotificationService {
                 },
                 body: JSON.stringify({
                     title: '💕 Test Notification',
-                    body: 'This is a test notification from InDate!',
+                    body: 'This is a test notification from mimi!',
                 }),
             });
 

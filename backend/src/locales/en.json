@@ -58,7 +58,7 @@
         "profile_updated": "Profile updated successfully"
     },
     "onboarding": {
-        "welcome": "Welcome to InDate",
+        "welcome": "Welcome to mimi",
         "tagline": "Find your perfect match with AI",
         "step_basics": "Basic Info",
         "step_photos": "Add Photos",
@@ -125,7 +125,7 @@
         "change_language": "Change Language",
         "dark_mode": "Dark Mode",
         "discovery_settings": "Discovery Settings",
-        "show_me_on_app": "Show Me on InDate",
+        "show_me_on_app": "Show Me on mimi",
         "distance_preference": "Maximum Distance",
         "age_range_preference": "Age Range",
         "help_support": "Help & Support",

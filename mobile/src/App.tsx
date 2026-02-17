@@ -1,5 +1,5 @@
 /**
- * InDate Mobile App Entry Point
+ * mimi Mobile App Entry Point
  */
 
 import React, { useEffect, useState } from 'react';

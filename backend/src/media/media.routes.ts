@@ -1,31 +1,41 @@
+/**
+ * Media Routes
+ * Зураг upload - Cloudinary эсвэл local fallback
+ */
+
 import { Router } from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { storage, isCloudinaryConfigured } from './cloudinary.config';
 import { uploadImage } from './media.controller';
 
 const router = Router();
 
-// Initialize multer with Cloudinary storage only if configured
-const upload = storage 
-    ? multer({
-        storage: storage,
-        limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-    })
-    : multer(); // Dummy multer instance
+// Local upload хавтас бэлдэх
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Local storage тохиргоо (Cloudinary байхгүй үед)
+const localStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => {
+        cb(null, uploadsDir);
+    },
+    filename: (_req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        const ext = path.extname(file.originalname) || '.jpg';
+        cb(null, `photo-${uniqueSuffix}${ext}`);
+    },
+});
+
+// Cloudinary эсвэл local storage сонгох
+const upload = isCloudinaryConfigured && storage
+    ? multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } })
+    : multer({ storage: localStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // POST /api/v1/media/upload
-router.post('/upload', (req, res, next) => {
-    // Check configuration before attempting upload
-    if (!isCloudinaryConfigured) {
-        return res.status(503).json({ 
-            status: 'error', 
-            message: 'Image upload not configured. Please set CLOUDINARY_* environment variables.',
-            hint: 'Get free account at https://cloudinary.com/ and add credentials to backend/.env'
-        });
-    }
-    
-    // Proceed with upload if configured
-    upload.single('image')(req, res, next);
-}, uploadImage);
+router.post('/upload', upload.single('image'), uploadImage);
 
 export default router;

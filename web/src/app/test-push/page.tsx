@@ -54,7 +54,7 @@ export default function TestPushPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-700 to-pink-500 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-[#FF4458] p-8">
             <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
                 <h1 className="text-3xl font-bold text-white mb-8">🔔 Push Notification Test</h1>
 
@@ -81,7 +81,7 @@ export default function TestPushPage() {
                         <button
                             onClick={subscribeUser}
                             disabled={isLoading}
-                            className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 rounded-xl text-white font-bold text-lg transition-all shadow-lg"
+                            className="w-full py-4 bg-gradient-to-r from-[#FD267A] to-[#FF6036] hover:from-[#FD267A]/90 hover:to-[#FF6036]/90 disabled:from-gray-600 disabled:to-gray-700 rounded-xl text-white font-bold text-lg transition-all shadow-lg"
                         >
                             {isLoading ? '⏳ Requesting Permission...' : '🔔 Enable Push Notifications'}
                         </button>

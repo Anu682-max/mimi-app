@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "InDate",
-        "slug": "indate",
+        "name": "mimi",
+        "slug": "mimi",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
@@ -16,14 +16,14 @@
         ],
         "ios": {
             "supportsTablet": true,
-            "bundleIdentifier": "com.indate.app"
+            "bundleIdentifier": "com.mimi.app"
         },
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#0A0A0F"
             },
-            "package": "com.indate.app"
+            "package": "com.mimi.app"
         },
         "web": {
             "favicon": "./assets/favicon.png"
@@ -40,7 +40,7 @@
             "expo-router"
         ],
         "extra": {
-            "apiUrl": "https://indate.vercel.app",
+            "apiUrl": "https://mimi.vercel.app",
             "eas": {
                 "projectId": "your-eas-project-id"
             }

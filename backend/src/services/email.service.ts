@@ -28,7 +28,7 @@ class EmailService {
     private isConfigured: boolean = false;
 
     constructor() {
-        this.fromEmail = process.env.GMAIL_USER || 'noreply@indate.com';
+        this.fromEmail = process.env.GMAIL_USER || 'noreply@mimi.com';
         this.initialize();
     }
 
@@ -71,7 +71,7 @@ class EmailService {
 
         try {
             const info = await this.transporter.sendMail({
-                from: `"InDate" <${this.fromEmail}>`,
+                from: `"mimi" <${this.fromEmail}>`,
                 to: options.to,
                 subject: options.subject,
                 html: options.html,
@@ -106,11 +106,11 @@ class EmailService {
 <body>
     <div class="container">
         <div class="header">
-            <h1>💕 Welcome to InDate!</h1>
+            <h1>💕 Welcome to mimi!</h1>
         </div>
         <div class="content">
             <h2>Hi ${name}! 👋</h2>
-            <p>Welcome to InDate - where meaningful connections happen!</p>
+            <p>Welcome to mimi - where meaningful connections happen!</p>
             <p>We're excited to have you on board. Here's what you can do:</p>
             <ul>
                 <li>✨ Complete your profile to attract matches</li>
@@ -124,8 +124,8 @@ class EmailService {
             <p>Happy dating! 💘</p>
         </div>
         <div class="footer">
-            <p>© 2025 InDate. All rights reserved.</p>
-            <p>You're receiving this because you signed up for InDate.</p>
+            <p>© 2025 mimi. All rights reserved.</p>
+            <p>You're receiving this because you signed up for mimi.</p>
         </div>
     </div>
 </body>
@@ -134,7 +134,7 @@ class EmailService {
 
         return this.sendEmail({
             to,
-            subject: '💕 Welcome to InDate!',
+            subject: '💕 Welcome to mimi!',
             html,
         });
     }
@@ -171,7 +171,7 @@ class EmailService {
             <p>Good luck! 💘</p>
         </div>
         <div class="footer">
-            <p>© 2025 InDate. All rights reserved.</p>
+            <p>© 2025 mimi. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -180,7 +180,7 @@ class EmailService {
 
         return this.sendEmail({
             to,
-            subject: '🎉 You have a new match on InDate!',
+            subject: '🎉 You have a new match on mimi!',
             html,
         });
     }
@@ -219,7 +219,7 @@ class EmailService {
             </center>
         </div>
         <div class="footer">
-            <p>© 2025 InDate. All rights reserved.</p>
+            <p>© 2025 mimi. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -228,7 +228,7 @@ class EmailService {
 
         return this.sendEmail({
             to,
-            subject: `💬 ${senderName} sent you a message on InDate`,
+            subject: `💬 ${senderName} sent you a message on mimi`,
             html,
         });
     }
@@ -268,7 +268,7 @@ class EmailService {
             </div>
         </div>
         <div class="footer">
-            <p>© 2025 InDate. All rights reserved.</p>
+            <p>© 2025 mimi. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -277,7 +277,7 @@ class EmailService {
 
         return this.sendEmail({
             to,
-            subject: '🔐 Reset Your InDate Password',
+            subject: '🔐 Reset Your mimi Password',
             html,
         });
     }

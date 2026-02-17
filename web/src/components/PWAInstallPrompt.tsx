@@ -9,29 +9,29 @@ export default function PWAInstallPrompt() {
     const [isStandalone, setIsStandalone] = useState(false);
 
     useEffect(() => {
-        // Check if running as PWA
+        // PWA горимд ажиллаж байгаа эсэхийг шалгах
         const standalone = window.matchMedia('(display-mode: standalone)').matches;
         setIsStandalone(standalone);
 
-        // Check if iOS
+        // iOS эсэхийг шалгах
         const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         setIsIOS(iOS);
 
-        // Listen for beforeinstallprompt event (Android/Chrome)
+        // beforeinstallprompt үйл явдал сонсох (Android/Chrome)
         const handleBeforeInstallPrompt = (e: Event) => {
-            // Prevent the mini-infobar from appearing
+            // Жижиг мэдэгдлийг харуулахгүй байх
             e.preventDefault();
-            // Save the event for later use
+            // Үйл явдлыг хадгалах
             setDeferredPrompt(e);
-            // Show custom install prompt after a delay
+            // Хугацааны дараа суулгах санал харуулах
             setTimeout(() => {
                 setShowPrompt(true);
-            }, 3000); // Show after 3 seconds
+            }, 3000);
         };
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-        // Show iOS install prompt if applicable
+        // iOS хэрэглэгчдэд суулгах санал харуулах
         if (iOS && !standalone) {
             setTimeout(() => {
                 setShowPrompt(true);
@@ -43,44 +43,46 @@ export default function PWAInstallPrompt() {
         };
     }, []);
 
+    // Суулгах товч дарах
     const handleInstallClick = async () => {
         if (!deferredPrompt && !isIOS) {
             return;
         }
 
         if (deferredPrompt) {
-            // Show the install prompt
+            // Суулгах цонхыг харуулах
             deferredPrompt.prompt();
 
-            // Wait for the user to respond
+            // Хэрэглэгчийн сонголтыг хүлээх
             const choiceResult = await deferredPrompt.userChoice;
 
             if (choiceResult.outcome === 'accepted') {
-                console.log('PWA installed');
+                console.log('PWA суулгагдсан');
             } else {
-                console.log('PWA installation dismissed');
+                console.log('PWA суулгалт цуцлагдсан');
             }
 
-            // Clear the deferred prompt
+            // Хадгалсан үйл явдлыг цэвэрлэх
             setDeferredPrompt(null);
         }
 
-        // Hide the prompt
+        // Саналыг нуух
         setShowPrompt(false);
     };
 
+    // Хаах товч дарах
     const handleDismiss = () => {
         setShowPrompt(false);
-        // Don't show again for 7 days
+        // 7 хоногийн дотор дахин харуулахгүй
         if (typeof window !== 'undefined') {
             localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
         }
     };
 
-    // Don't show if already installed or dismissed recently
+    // Аль хэдийн суулгасан бол харуулахгүй
     if (isStandalone) return null;
 
-    // Check localStorage only on client side
+    // localStorage шалгах (зөвхөн client талд)
     if (typeof window !== 'undefined') {
         const dismissedTime = localStorage.getItem('pwa-prompt-dismissed');
         if (dismissedTime) {
@@ -96,35 +98,35 @@ export default function PWAInstallPrompt() {
             className={`fixed top-0 left-0 right-0 z-[100] transform transition-transform duration-500 ease-out ${showPrompt ? 'translate-y-0' : '-translate-y-full'
                 }`}
         >
-            <div className="bg-gradient-to-r from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] border-b border-purple-500/30 backdrop-blur-xl shadow-2xl safe-top">
+            <div className="bg-white border-b border-[#E8E6EA] shadow-xl safe-top">
                 <div className="flex flex-col p-3 sm:p-4 gap-3 max-w-lg mx-auto w-full">
 
                     <div className="flex items-center gap-3 w-full">
-                        {/* App Icon */}
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
-                            <span className="text-xl animate-pulse">🔮</span>
+                        {/* Апп дүрс */}
+                        <div className="w-10 h-10 rounded-xl bg-linear-to-r from-[#FD267A] to-[#FF6036] flex items-center justify-center shadow-md shrink-0">
+                            <span className="text-xl">❤️</span>
                         </div>
 
-                        {/* Title & Desc */}
+                        {/* Гарчиг ба тайлбар */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-white text-sm leading-tight truncate">
-                                Install InDate
+                            <h3 className="font-bold text-[#21262E] text-sm leading-tight truncate">
+                                Install mimi
                             </h3>
                             {isIOS ? (
-                                <p className="text-[10px] text-gray-300 mt-0.5 leading-tight">
-                                    Tap <span className="inline-flex align-middle"><svg className="w-3 h-3 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L12 15M12 2L6 8M12 2L18 8M5 21L19 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span> Share, then "Add to Home"
+                                <p className="text-[10px] text-[#656E7B] mt-0.5 leading-tight">
+                                    Tap <span className="inline-flex align-middle"><svg className="w-3 h-3 text-[#FF4458]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L12 15M12 2L6 8M12 2L18 8M5 21L19 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span> Share, then "Add to Home"
                                 </p>
                             ) : (
-                                <p className="text-[10px] text-gray-300 mt-0.5 leading-tight">
-                                    Get the full magical experience ✨
+                                <p className="text-[10px] text-[#656E7B] mt-0.5 leading-tight">
+                                    Get the best dating experience
                                 </p>
                             )}
                         </div>
 
-                        {/* Close Button */}
+                        {/* Хаах товч */}
                         <button
                             onClick={handleDismiss}
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors shrink-0"
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F2F4] hover:bg-[#E8E6EA] text-[#656E7B] hover:text-[#21262E] transition-colors shrink-0"
                             aria-label="Dismiss"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,11 +135,11 @@ export default function PWAInstallPrompt() {
                         </button>
                     </div>
 
-                    {/* Install Action Button (Full width on mobile) */}
+                    {/* Суулгах товч (бүтэн өргөнтэй) */}
                     {!isIOS && deferredPrompt && (
                         <button
                             onClick={handleInstallClick}
-                            className="w-full bg-white text-purple-900 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-white/5 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-linear-to-r from-[#FD267A] to-[#FF6036] text-white py-2.5 rounded-full text-sm font-bold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             <span>Install Now</span>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>

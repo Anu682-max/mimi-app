@@ -4,8 +4,13 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import MobileNav from "./MobileNav";
+import IncomingCallModal from "./IncomingCallModal";
+import { useWebRTC } from "@/hooks/useWebRTC";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+    // Глобал WebRTC hook — аливаа хуудас дээр ирж буй дуудлагыг хүлээн авах
+    const { incomingCall, callState, acceptCall, rejectCall } = useWebRTC();
+
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
@@ -17,6 +22,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <Footer />
             <MobileNav />
+
+            {/* Глобал ирж буй дуудлагын модал */}
+            {incomingCall && callState === 'ringing' && (
+                <IncomingCallModal
+                    incomingCall={incomingCall}
+                    onAccept={acceptCall}
+                    onReject={rejectCall}
+                />
+            )}
         </div>
     );
 }

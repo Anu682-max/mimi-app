@@ -140,7 +140,7 @@ export default function RestaurantDetailPage({ params }: { params: { id: string 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF4458]"></div>
             </div>
         );
     }
@@ -152,7 +152,7 @@ export default function RestaurantDetailPage({ params }: { params: { id: string 
                     <p className="text-red-500 text-lg mb-4">{error || 'Ресторан олдсонгүй'}</p>
                     <button
                         onClick={() => router.push('/restaurants')}
-                        className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600"
+                        className="bg-[#FF4458] text-white px-6 py-2 rounded-lg hover:bg-[#FF4458]/90"
                     >
                         Буцах
                     </button>
@@ -209,11 +209,11 @@ export default function RestaurantDetailPage({ params }: { params: { id: string 
                                                 {item.description && (
                                                     <p className="mt-1 text-gray-600 text-sm">{item.description}</p>
                                                 )}
-                                                <p className="mt-2 text-pink-600 font-bold text-xl">{item.price.toLocaleString()}₮</p>
+                                                <p className="mt-2 text-[#FF4458] font-bold text-xl">{item.price.toLocaleString()}₮</p>
                                             </div>
                                             <button
                                                 onClick={() => addToCart(item)}
-                                                className="ml-4 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                                                className="ml-4 bg-[#FF4458] hover:bg-[#FF4458]/90 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                                             >
                                                 + Сагсанд
                                             </button>
@@ -262,7 +262,7 @@ export default function RestaurantDetailPage({ params }: { params: { id: string 
                                     <div className="border-t pt-4">
                                         <div className="flex justify-between text-lg font-bold mb-4">
                                             <span>Нийт:</span>
-                                            <span className="text-pink-600">{getTotalAmount().toLocaleString()}₮</span>
+                                            <span className="text-[#FF4458]">{getTotalAmount().toLocaleString()}₮</span>
                                         </div>
 
                                         <div className="mb-4">
@@ -274,14 +274,14 @@ export default function RestaurantDetailPage({ params }: { params: { id: string 
                                                 onChange={(e) => setDeliveryAddress(e.target.value)}
                                                 placeholder="Хаягаа оруулна уу..."
                                                 rows={3}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF4458] focus:border-transparent"
                                             />
                                         </div>
 
                                         <button
                                             onClick={handleOrder}
                                             disabled={ordering}
-                                            className="w-full bg-pink-500 hover:bg-pink-600 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition-colors"
+                                            className="w-full bg-[#FF4458] hover:bg-[#FF4458]/90 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition-colors"
                                         >
                                             {ordering ? 'Захиалж байна...' : '🛍️ Захиалах'}
                                         </button>

@@ -4,12 +4,13 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { userRepository } from '../user/user.repository';
 import { t } from '../common/i18n';
 import { config } from '../config';
 import { createError } from '../common/middleware/error.middleware';
 import { logger } from '../common/logger';
+import { sendVerificationEmail, sendPasswordResetEmail, verifyToken } from './emailVerification';
 
 export const authRouter: Router = Router();
 
@@ -113,14 +114,18 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
         }
 
         // Generate token
-        const jwtOptions: SignOptions = { expiresIn: config.jwt.expiresIn as (string | number) };
         const token = jwt.sign(
             { userId: user._id, email: user.email },
             config.jwt.secret as string,
-            jwtOptions
+            { expiresIn: '7d' }
         );
 
         logger.info(`User registered: ${user.email}`);
+
+        // Email баталгаажуулалтын мэйл илгээх
+        sendVerificationEmail(email, user._id.toString(), firstName).catch(err => {
+            logger.error('Failed to send verification email:', err);
+        });
 
         res.status(201).json({
             message: t('auth.verification_sent', userLocale),
@@ -223,17 +228,125 @@ authRouter.post('/logout', async (req: Request, res: Response, next: NextFunctio
 
 /**
  * POST /auth/forgot-password
- * Request password reset
+ * Нууц үг сэргээх хүсэлт
  */
 authRouter.post('/forgot-password', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email } = req.body;
         const locale = req.locale;
 
-        // Always return success to prevent email enumeration
+        // Хэрэглэгч олох (email enumeration-аас хамгаалахын тулд үргэлж амжилттай хариу буцаана)
+        const user = await userRepository.getByEmail(email);
+        if (user) {
+            sendPasswordResetEmail(email, user._id.toString()).catch(err => {
+                logger.error('Failed to send password reset email:', err);
+            });
+        }
+
         res.json({
             message: t('auth.password_reset_sent', locale),
         });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * POST /auth/verify-email
+ * Имэйл баталгаажуулах
+ */
+authRouter.post('/verify-email', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            throw createError('Token is required', 400, 'TOKEN_REQUIRED');
+        }
+
+        const result = await verifyToken(token, 'email_verify');
+        if (!result) {
+            throw createError('Invalid or expired token', 400, 'INVALID_TOKEN');
+        }
+
+        // Хэрэглэгчийг баталгаажуулсан гэж тэмдэглэх
+        try {
+            await userRepository.update(result.userId, { isVerified: true });
+        } catch {
+            // Mock mode-д mockUsers шинэчлэх
+            for (const [, user] of mockUsers) {
+                if (user._id === result.userId) {
+                    user.isVerified = true;
+                    break;
+                }
+            }
+        }
+
+        logger.info(`Email verified for user ${result.userId}`);
+        res.json({ status: 'success', message: 'Email verified successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * POST /auth/reset-password
+ * Нууц үг шинэчлэх (токеноор)
+ */
+authRouter.post('/reset-password', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            throw createError('Token and new password are required', 400, 'MISSING_FIELDS');
+        }
+
+        if (newPassword.length < 8) {
+            throw createError('Password must be at least 8 characters', 400, 'PASSWORD_MIN_LENGTH');
+        }
+
+        const result = await verifyToken(token, 'password_reset');
+        if (!result) {
+            throw createError('Invalid or expired token', 400, 'INVALID_TOKEN');
+        }
+
+        // Шинэ нууц үг хэшлэх
+        const passwordHash = await bcrypt.hash(newPassword, 12);
+
+        try {
+            await userRepository.update(result.userId, { passwordHash });
+        } catch {
+            // Mock mode
+            for (const [, user] of mockUsers) {
+                if (user._id === result.userId) {
+                    user.passwordHash = passwordHash;
+                    break;
+                }
+            }
+        }
+
+        logger.info(`Password reset for user ${result.userId}`);
+        res.json({ status: 'success', message: 'Password reset successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * POST /auth/resend-verification
+ * Баталгаажуулалтын мэйл дахин илгээх
+ */
+authRouter.post('/resend-verification', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email } = req.body;
+
+        const user = await userRepository.getByEmail(email);
+        if (user && !user.isVerified) {
+            sendVerificationEmail(email, user._id.toString(), user.firstName).catch(err => {
+                logger.error('Failed to resend verification email:', err);
+            });
+        }
+
+        res.json({ message: 'If the email exists and is not verified, a verification email has been sent.' });
     } catch (error) {
         next(error);
     }

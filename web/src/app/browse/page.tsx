@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { HeartIcon, XMarkIcon, ArrowLeftIcon, SparklesIcon, MapPinIcon } from '@heroicons/react/24/solid';
+import { HeartIcon, XMarkIcon, ArrowLeftIcon, SparklesIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/solid';
 
+// Профайлын интерфейс
 interface Profile {
     id: string;
     name: string;
@@ -24,6 +25,7 @@ export default function BrowsePage() {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [answers, setAnswers] = useState<string[]>([]);
 
+    // Сонирхлын асуултууд
     const interestQuestions = [
         {
             question: 'What do you enjoy doing in your free time?',
@@ -51,6 +53,7 @@ export default function BrowsePage() {
         }
     ];
 
+    // Профайлуудын жагсаалт
     const profiles: Profile[] = [
         {
             id: '1',
@@ -99,16 +102,18 @@ export default function BrowsePage() {
         },
     ];
 
+    // Нэвтрэлт шалгах
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.push('/login');
         }
     }, [authLoading, isAuthenticated, router]);
 
+    // Ачаалж байна
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            <div className="min-h-screen flex items-center justify-center bg-[#F0F2F4]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF4458]"></div>
             </div>
         );
     }
@@ -118,9 +123,10 @@ export default function BrowsePage() {
     const currentProfile = profiles[currentIndex];
     const noMoreProfiles = currentIndex >= profiles.length;
 
+    // Шудрах үйлдэл
     const handleSwipe = (liked: boolean) => {
         if (liked) {
-            // Show interest questions before matching
+            // Like дарсан бол асуултуудыг харуулах
             setShowQuestions(true);
             setCurrentQuestion(0);
             setAnswers([]);
@@ -129,6 +135,7 @@ export default function BrowsePage() {
         }
     };
 
+    // Асуултанд хариулах
     const handleAnswerQuestion = (answer: string) => {
         const newAnswers = [...answers, answer];
         setAnswers(newAnswers);
@@ -136,9 +143,9 @@ export default function BrowsePage() {
         if (currentQuestion < interestQuestions.length - 1) {
             setCurrentQuestion(prev => prev + 1);
         } else {
-            // All questions answered, now check for match
+            // Бүх асуултанд хариулсан, match шалгах
             setShowQuestions(false);
-            // Simulate match (30% chance)
+            // Match магадлал (30%)
             if (Math.random() > 0.7) {
                 setShowMatch(true);
                 setTimeout(() => setShowMatch(false), 3000);
@@ -148,77 +155,74 @@ export default function BrowsePage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute top-10 left-10 w-64 h-64 bg-pink-300/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl animate-pulse delay-700" />
-            
-            {/* Header */}
-            <header className="relative z-10 px-6 py-5 flex justify-between items-center bg-white/70 backdrop-blur-xl border-b border-pink-100/50">
+        <main className="min-h-screen bg-[#F0F2F4] relative overflow-hidden">
+            {/* Толгой хэсэг */}
+            <header className="relative z-10 px-6 py-5 flex justify-between items-center bg-white border-b border-[#E8E6EA]">
                 <button
                     onClick={() => router.push('/discover')}
-                    className="w-11 h-11 bg-gradient-to-br from-white to-pink-50 rounded-2xl shadow-lg flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all active:scale-95 group"
+                    className="w-11 h-11 bg-[#F0F2F4] rounded-full shadow-sm flex items-center justify-center hover:bg-[#E8E6EA] transition-all active:scale-95"
                 >
-                    <ArrowLeftIcon className="w-5 h-5 text-gray-600 group-hover:text-pink-500 transition-colors" />
+                    <ArrowLeftIcon className="w-5 h-5 text-[#656E7B]" />
                 </button>
-                <h1 className="text-2xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-black text-[#FF4458]">
                     Browse Profiles
                 </h1>
                 <div className="w-11" />
             </header>
 
-            {/* Main Content */}
+            {/* Үндсэн агуулга */}
             <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] p-6">
                 {noMoreProfiles ? (
-                    <div className="text-center animate-fade-in">
-                        <div className="w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                    /* Профайл дууссан дэлгэц */
+                    <div className="text-center">
+                        <div className="w-24 h-24 bg-linear-to-r from-[#FD267A] to-[#FF6036] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                             <SparklesIcon className="w-12 h-12 text-white" />
                         </div>
-                        <h2 className="text-3xl font-black text-gray-900 mb-3">No More Profiles</h2>
-                        <p className="text-gray-600 mb-8">Check back later for new matches!</p>
+                        <h2 className="text-3xl font-black text-[#21262E] mb-3">No More Profiles</h2>
+                        <p className="text-[#656E7B] mb-8">Check back later for new matches!</p>
                         <button
                             onClick={() => setCurrentIndex(0)}
-                            className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                            className="px-8 py-4 bg-linear-to-r from-[#FD267A] to-[#FF6036] hover:opacity-90 text-white font-bold rounded-full shadow-md active:scale-95 transition-all"
                         >
                             Start Over
                         </button>
                     </div>
                 ) : currentProfile ? (
-                    <div className="w-full max-w-md animate-fade-in">
-                        {/* Profile Card */}
-                        <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] overflow-hidden shadow-2xl border border-white/50">
-                            {/* Photo */}
-                            <div className="aspect-[3/4] bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center overflow-hidden relative">
+                    <div className="w-full max-w-md">
+                        {/* Профайл карт - Tinder загвар */}
+                        <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-[#E8E6EA]">
+                            {/* Зураг */}
+                            <div className="aspect-3/4 bg-[#F0F2F4] flex items-center justify-center overflow-hidden relative">
                                 <img
                                     src={currentProfile.photo}
                                     alt={currentProfile.name}
                                     className="w-full h-full object-cover"
                                 />
-                                {/* Gradient Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                                
-                                {/* Profile Info on Photo */}
+                                {/* Gradient давхарга */}
+                                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+
+                                {/* Зураг дээрх мэдээлэл */}
                                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                                     <h2 className="text-4xl font-black mb-2 drop-shadow-lg">
                                         {currentProfile.name}, {currentProfile.age}
                                     </h2>
                                     <div className="flex items-center space-x-2 mb-3">
                                         <MapPinIcon className="w-4 h-4" />
-                                        <span className="text-sm font-medium drop-shadow">{currentProfile.location}</span>
+                                        <span className="text-sm font-medium">{currentProfile.location}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Info Section */}
+                            {/* Мэдээллийн хэсэг */}
                             <div className="p-6">
-                                <p className="text-gray-700 text-lg mb-4 font-medium">{currentProfile.bio}</p>
-                                
-                                {/* Interests */}
+                                <p className="text-[#21262E] text-lg mb-4 font-medium">{currentProfile.bio}</p>
+
+                                {/* Сонирхлууд */}
                                 <div className="flex flex-wrap gap-2">
                                     {currentProfile.interests.map((interest, i) => (
                                         <span
                                             key={i}
-                                            className="px-4 py-2 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 rounded-full text-sm font-bold border border-pink-200"
+                                            className="px-4 py-2 bg-[#F0F2F4] text-[#FF4458] rounded-full text-sm font-bold border border-[#E8E6EA]"
                                         >
                                             {interest}
                                         </span>
@@ -227,52 +231,63 @@ export default function BrowsePage() {
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex justify-center gap-6 mt-8">
+                        {/* Үйлдлийн товчууд - Tinder загвар */}
+                        <div className="flex justify-center items-center gap-5 mt-8">
+                            {/* Nope товч */}
                             <button
                                 onClick={() => handleSwipe(false)}
-                                className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-gray-200 group"
+                                className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl active:scale-95 transition-all border border-[#E8E6EA]"
                             >
-                                <XMarkIcon className="w-8 h-8 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                                <XMarkIcon className="w-8 h-8 text-[#656E7B]" />
                             </button>
+
+                            {/* Super Like товч */}
                             <button
                                 onClick={() => handleSwipe(true)}
-                                className="w-20 h-20 bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl hover:shadow-pink-500/50 hover:scale-110 active:scale-95 transition-all"
+                                className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl active:scale-95 transition-all border border-[#E8E6EA]"
                             >
-                                <HeartIcon className="w-10 h-10 text-white" />
+                                <StarIcon className="w-7 h-7 text-[#17B5EB]" />
+                            </button>
+
+                            {/* Like товч */}
+                            <button
+                                onClick={() => handleSwipe(true)}
+                                className="w-16 h-16 bg-linear-to-r from-[#FD267A] to-[#FF6036] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl active:scale-95 transition-all"
+                            >
+                                <HeartIcon className="w-8 h-8 text-white" />
                             </button>
                         </div>
                     </div>
                 ) : null}
             </div>
 
-            {/* Interest Questions Modal */}
+            {/* Сонирхлын асуултын цонх */}
             {showQuestions && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
-                    <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 max-w-md w-full shadow-2xl border border-white/50">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-xl border border-[#E8E6EA]">
                         <div className="text-center mb-6">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 mb-4 shadow-lg">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-r from-[#FD267A] to-[#FF6036] mb-4 shadow-md">
                                 <SparklesIcon className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-black text-gray-900 mb-2">
+                            <h3 className="text-2xl font-black text-[#21262E] mb-2">
                                 Tell Us About Yourself
                             </h3>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-[#656E7B]">
                                 Question {currentQuestion + 1} of {interestQuestions.length}
                             </p>
                         </div>
 
                         <div className="mb-6">
-                            <p className="text-lg font-bold text-gray-800 text-center mb-6">
+                            <p className="text-lg font-bold text-[#21262E] text-center mb-6">
                                 {interestQuestions[currentQuestion].question}
                             </p>
-                            
+
                             <div className="space-y-3">
                                 {interestQuestions[currentQuestion].options.map((option, i) => (
                                     <button
                                         key={i}
                                         onClick={() => handleAnswerQuestion(option)}
-                                        className="w-full py-4 px-6 bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 text-gray-800 rounded-2xl font-bold transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 border border-pink-200"
+                                        className="w-full py-4 px-6 bg-[#F0F2F4] hover:bg-[#E8E6EA] text-[#21262E] rounded-full font-bold transition-all shadow-sm active:scale-95 border border-[#E8E6EA]"
                                     >
                                         {option}
                                     </button>
@@ -280,16 +295,17 @@ export default function BrowsePage() {
                             </div>
                         </div>
 
+                        {/* Явцын заалт */}
                         <div className="flex justify-center gap-2">
                             {interestQuestions.map((_, idx) => (
                                 <div
                                     key={idx}
                                     className={`h-2 w-2 rounded-full transition-all ${
                                         idx === currentQuestion
-                                            ? 'bg-pink-500 w-8'
+                                            ? 'bg-[#FF4458] w-8'
                                             : idx < currentQuestion
-                                            ? 'bg-pink-400'
-                                            : 'bg-gray-300'
+                                            ? 'bg-[#FF4458]/60'
+                                            : 'bg-[#E8E6EA]'
                                     }`}
                                 />
                             ))}
@@ -298,12 +314,14 @@ export default function BrowsePage() {
                 </div>
             )}
 
-            {/* Match Modal */}
+            {/* Match цонх */}
             {showMatch && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-                    <div className="text-center p-8 animate-bounce-slow">
-                        <div className="text-8xl mb-6">🎉</div>
-                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-4">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                    <div className="text-center p-8">
+                        <div className="w-24 h-24 bg-linear-to-r from-[#FD267A] to-[#FF6036] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <HeartIcon className="w-14 h-14 text-white" />
+                        </div>
+                        <h2 className="text-5xl font-black text-[#FF4458] mb-4">
                             It's a Match!
                         </h2>
                         <p className="text-white text-xl font-medium">

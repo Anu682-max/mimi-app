@@ -1,6 +1,6 @@
 /**
- * InDate Backend - Main Entry Point
- * 
+ * mimi Backend - Main Entry Point
+ *
  * AI-powered dating app with multi-region internationalization
  */
 
@@ -8,6 +8,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
+import path from 'path';
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 
@@ -22,6 +23,12 @@ import mediaRouter from './media/media.routes';
 import notificationRouter from './notification/notification.routes';
 import { localeMiddleware } from './common/middleware/locale.middleware';
 import { errorHandler } from './common/middleware/error.middleware';
+import { apiLimiter, authLimiter } from './common/middleware/rateLimit.middleware';
+import blockReportRouter from './block-report/blockReport.routes';
+import webrtcRouter from './webrtc/webrtc.routes';
+import paymentRouter from './payment/payment.routes';
+import oauthRouter from './auth/oauth.routes';
+import postRouter from './post/post.routes';
 
 const app: express.Express = express();
 const httpServer = createServer(app);
@@ -37,13 +44,16 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:19006'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-Locale', 'X-Timezone']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Upload хийгдсэн зургуудыг static файл болгон serve хийх
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Locale middleware - sets user's locale from header or user profile
 app.use(localeMiddleware);
@@ -58,15 +68,22 @@ app.get('/health', (req: Request, res: Response) => {
     });
 });
 
-// API Routes
+// Бүх API route-д rate limiting нэмэх
 const apiPrefix = `/api/${config.apiVersion}`;
+app.use(apiPrefix, apiLimiter);
 
-app.use(`${apiPrefix}/auth`, authRouter);
+// Auth route-д илүү хатуу rate limit
+app.use(`${apiPrefix}/auth`, authLimiter, authRouter);
 app.use(`${apiPrefix}/users`, userRouter);
 app.use(`${apiPrefix}/matches`, matchRouter);
 app.use(`${apiPrefix}/chat`, chatRouter);
 app.use(`${apiPrefix}/media`, mediaRouter);
 app.use(`${apiPrefix}/notifications`, notificationRouter);
+app.use(`${apiPrefix}/block-report`, blockReportRouter);
+app.use(`${apiPrefix}/webrtc`, webrtcRouter);
+app.use(`${apiPrefix}/payments`, paymentRouter);
+app.use(`${apiPrefix}/auth/oauth`, oauthRouter);
+app.use(`${apiPrefix}/posts`, postRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

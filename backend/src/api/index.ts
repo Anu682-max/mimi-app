@@ -96,7 +96,7 @@ app.get('/health', async (_req: Request, res: Response): Promise<void> => {
 // Root route
 app.get('/', (_req: Request, res: Response): void => {
     res.json({
-        app: 'InDate API',
+        app: 'mimi API',
         version: '1.0.0',
         docs: '/api/v1/users/locales',
     });
@@ -1118,7 +1118,7 @@ app.post(`${apiPrefix}/notifications/send`, async (req: Request, res: Response):
         if (webSubscriptions.length > 0) {
             const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
             const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-            const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@indate.com';
+            const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@mimi.com';
 
             if (vapidPublicKey && vapidPrivateKey) {
                 const webpush = await import('web-push');

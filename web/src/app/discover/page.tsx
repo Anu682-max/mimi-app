@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeartIcon, SparklesIcon, ArrowLeftIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
+// Нууц илгээгчийн интерфейс
 interface SecretSender {
     id: string;
     name: string;
@@ -19,43 +20,47 @@ export default function DiscoverPage() {
     const [selectedHints, setSelectedHints] = useState<string[]>([]);
     const [currentSenderIndex, setCurrentSenderIndex] = useState(0);
 
+    // Нууц илгээгчдийн жагсаалт
     const secretSenders: SecretSender[] = [
-        { 
-            id: '1', 
-            name: 'Marie Claire', 
+        {
+            id: '1',
+            name: 'Marie Claire',
             message: 'I love you,',
-            gradient: 'from-pink-400 via-red-400 to-rose-500'
+            gradient: 'from-[#FD267A] to-[#FF6036]'
         },
-        { 
-            id: '2', 
-            name: 'Sophie Miller', 
+        {
+            id: '2',
+            name: 'Sophie Miller',
             message: 'You are special,',
-            gradient: 'from-purple-400 via-pink-400 to-rose-400'
+            gradient: 'from-[#FD267A] to-[#FF6036]'
         },
-        { 
-            id: '3', 
-            name: 'Emma Collins', 
+        {
+            id: '3',
+            name: 'Emma Collins',
             message: 'Thinking of you,',
-            gradient: 'from-rose-400 via-pink-500 to-purple-500'
+            gradient: 'from-[#FD267A] to-[#FF6036]'
         },
     ];
 
+    // Зөвлөмж сонголтууд
     const availableHints = [
         { id: 'photo', label: 'Photo', icon: '📷' },
         { id: 'voice', label: 'Voice', icon: '🎤' },
         { id: 'hint', label: 'One Hint', icon: '💡' },
     ];
 
+    // Нэвтрэлт шалгах
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.push('/login');
         }
     }, [authLoading, isAuthenticated, router]);
 
+    // Ачаалж байна
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            <div className="min-h-screen flex items-center justify-center bg-[#F0F2F4]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF4458]"></div>
             </div>
         );
     }
@@ -64,6 +69,7 @@ export default function DiscoverPage() {
 
     const currentSender = secretSenders[currentSenderIndex];
 
+    // Зөвлөмж сонгох/болих
     const toggleHint = (hintId: string) => {
         if (selectedHints.includes(hintId)) {
             setSelectedHints(selectedHints.filter((h) => h !== hintId));
@@ -72,17 +78,20 @@ export default function DiscoverPage() {
         }
     };
 
+    // Хариу илгээх
     const handleRespond = () => {
         alert('Your response has been sent! 💕');
         nextSender();
     };
 
+    // Үргэлжлүүлэх
     const handleContinue = () => {
         if (selectedHints.length > 0) {
             setStep('reveal');
         }
     };
 
+    // Дараагийн илгээгч рүү шилжих
     const nextSender = () => {
         if (currentSenderIndex < secretSenders.length - 1) {
             setCurrentSenderIndex(currentSenderIndex + 1);
@@ -94,114 +103,77 @@ export default function DiscoverPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
-            {/* 3D Glass Bubbles Background */}
-            <div className="absolute top-20 right-20 w-80 h-80 rounded-full bg-gradient-to-br from-pink-300/40 via-purple-300/30 to-transparent backdrop-blur-3xl shadow-2xl animate-float" 
-                 style={{
-                     boxShadow: 'inset 0 -80px 120px rgba(255, 255, 255, 0.3), 0 30px 60px rgba(219, 39, 119, 0.2)'
-                 }} 
-            />
-            <div className="absolute bottom-32 left-16 w-64 h-64 rounded-full bg-gradient-to-br from-purple-400/40 via-pink-300/30 to-transparent backdrop-blur-3xl shadow-2xl animate-float-delayed" 
-                 style={{
-                     boxShadow: 'inset 0 -60px 100px rgba(255, 255, 255, 0.4), 0 25px 50px rgba(168, 85, 247, 0.2)'
-                 }} 
-            />
-            <div className="absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-gradient-to-br from-rose-300/40 via-pink-300/30 to-transparent backdrop-blur-2xl shadow-xl animate-pulse" 
-                 style={{
-                     boxShadow: 'inset 0 -40px 80px rgba(255, 255, 255, 0.35), 0 20px 40px rgba(244, 63, 94, 0.15)'
-                 }} 
-            />
-            <div className="absolute bottom-1/4 right-1/3 w-56 h-56 rounded-full bg-gradient-to-br from-blue-300/30 via-purple-300/30 to-transparent backdrop-blur-3xl shadow-2xl" 
-                 style={{
-                     boxShadow: 'inset 0 -50px 90px rgba(255, 255, 255, 0.3), 0 22px 45px rgba(147, 197, 253, 0.18)',
-                     animation: 'float 8s ease-in-out infinite'
-                 }} 
-            />
-            
-            {/* Smaller Floating Bubbles */}
-            <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-full bg-gradient-to-br from-pink-200/50 to-transparent backdrop-blur-xl shadow-lg animate-bounce" 
-                 style={{
-                     boxShadow: 'inset 0 -30px 60px rgba(255, 255, 255, 0.4), 0 15px 30px rgba(251, 207, 232, 0.2)'
-                 }} 
-            />
-            <div className="absolute bottom-40 right-20 w-40 h-40 rounded-full bg-gradient-to-br from-purple-200/40 to-transparent backdrop-blur-xl shadow-lg" 
-                 style={{
-                     boxShadow: 'inset 0 -35px 70px rgba(255, 255, 255, 0.35), 0 18px 35px rgba(233, 213, 255, 0.2)',
-                     animation: 'float-delayed 7s ease-in-out infinite'
-                 }} 
-            />
-            
-            {/* Back Button */}
+        <div className="min-h-screen bg-[#F0F2F4] flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Буцах товч */}
             <button
                 onClick={() => router.push('/dashboard')}
-                className="absolute top-6 left-6 w-12 h-12 bg-white/90 backdrop-blur-xl rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-xl z-50 border border-pink-100 group active:scale-95"
+                className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-all shadow-md z-50 border border-[#E8E6EA] active:scale-95"
             >
-                <ArrowLeftIcon className="w-5 h-5 text-gray-800 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeftIcon className="w-5 h-5 text-[#21262E]" />
             </button>
 
-            {/* Browse Profiles Button */}
+            {/* Профайл үзэх товч */}
             <button
                 onClick={() => router.push('/browse')}
-                className="absolute top-6 right-24 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all z-50 active:scale-95 text-sm"
+                className="absolute top-6 right-24 px-5 py-2.5 bg-linear-to-r from-[#FD267A] to-[#FF6036] hover:opacity-90 text-white font-bold rounded-full shadow-md transition-all z-50 active:scale-95 text-sm"
             >
-                🔍 Browse Profiles
+                Browse Profiles
             </button>
 
-            {/* Progress Indicator */}
+            {/* Явцын заалт */}
             <div className="absolute top-6 right-6 flex gap-2.5 z-50">
                 {secretSenders.map((_, idx) => (
-                    <div 
+                    <div
                         key={idx}
                         className={`h-2 rounded-full transition-all duration-500 ${
-                            idx === currentSenderIndex ? 'bg-gradient-to-r from-pink-500 to-rose-500 w-8 shadow-lg' : 
-                            idx < currentSenderIndex ? 'bg-pink-400 w-2' : 'bg-white/60 w-2'
+                            idx === currentSenderIndex ? 'bg-[#FF4458] w-8' :
+                            idx < currentSenderIndex ? 'bg-[#FF4458]/60 w-2' : 'bg-[#E8E6EA] w-2'
                         }`}
                     />
                 ))}
             </div>
 
-            {/* Main Card */}
-            <div className="w-full max-w-md animate-fade-in">
-                {/* Guess Screen */}
+            {/* Үндсэн картын хэсэг */}
+            <div className="w-full max-w-md">
+                {/* Таах дэлгэц */}
                 {step === 'guess' && (
-                    <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 shadow-2xl border border-white/50">
+                    <div className="bg-white rounded-xl p-8 shadow-md border border-[#E8E6EA]">
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">
+                            <h1 className="text-3xl font-black text-[#21262E] mb-3 tracking-tight">
                                 Guess Your Secret Sender
                             </h1>
-                            <p className="text-sm text-gray-500 font-medium">Someone special sent you a message</p>
+                            <p className="text-sm text-[#656E7B] font-medium">Someone special sent you a message</p>
                         </div>
 
-                        {/* Heart Card */}
-                        <div className={`relative bg-gradient-to-br ${currentSender.gradient} rounded-[28px] p-10 mb-8 shadow-2xl overflow-hidden group hover:scale-105 transition-transform duration-300`}>
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.2)_0%,_transparent_60%)]" />
-                            <div className="absolute top-5 right-5 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center animate-pulse">
-                                <HeartIcon className="w-8 h-8 text-white drop-shadow-lg" />
+                        {/* Зүрхэн карт */}
+                        <div className={`relative bg-linear-to-r ${currentSender.gradient} rounded-xl p-10 mb-8 shadow-lg overflow-hidden`}>
+                            <div className="absolute top-5 right-5 w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                                <HeartIcon className="w-8 h-8 text-white" />
                             </div>
-                            
+
                             <div className="text-center mt-8 relative z-10">
                                 <div className="mb-6">
-                                    <HeartIcon className="w-20 h-20 text-white mx-auto drop-shadow-2xl animate-bounce-slow" />
+                                    <HeartIcon className="w-20 h-20 text-white mx-auto" />
                                 </div>
-                                <p className="text-white text-2xl font-bold mb-3 tracking-wide">{currentSender.message}</p>
-                                <p className="text-white text-4xl font-black drop-shadow-lg">{currentSender.name}</p>
+                                <p className="text-white text-2xl font-bold mb-3">{currentSender.message}</p>
+                                <p className="text-white text-4xl font-black">{currentSender.name}</p>
                             </div>
                         </div>
 
-                        {/* Response Button */}
+                        {/* Хариу өгөх товч */}
                         <button
                             onClick={handleRespond}
-                            className="w-full py-5 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-bold rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 mb-5 text-lg"
+                            className="w-full py-5 bg-linear-to-r from-[#FD267A] to-[#FF6036] hover:opacity-90 text-white font-bold rounded-full transition-all shadow-md active:scale-95 mb-5 text-lg"
                         >
                             Respond Now
                         </button>
 
-                        {/* Ask for Hints */}
-                        <div className="text-center pt-4 border-t border-gray-100">
-                            <p className="text-sm text-gray-500 mb-3 font-medium">Still don't know who they are?</p>
+                        {/* Зөвлөмж асуух */}
+                        <div className="text-center pt-4 border-t border-[#E8E6EA]">
+                            <p className="text-sm text-[#656E7B] mb-3 font-medium">Still don't know who they are?</p>
                             <button
                                 onClick={() => setStep('hints')}
-                                className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition-all"
+                                className="text-sm font-bold text-[#FF4458] hover:opacity-80 transition-all"
                             >
                                 ASK FOR HINTS →
                             </button>
@@ -209,49 +181,49 @@ export default function DiscoverPage() {
                     </div>
                 )}
 
-                {/* Hints Screen */}
+                {/* Зөвлөмж дэлгэц */}
                 {step === 'hints' && (
-                    <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] p-8 shadow-2xl border border-white/50 animate-fade-in">
+                    <div className="bg-white rounded-xl p-8 shadow-md border border-[#E8E6EA]">
                         <div className="text-center mb-10">
-                            <h1 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">Add Hints</h1>
-                            <p className="text-sm text-gray-500 font-medium">
+                            <h1 className="text-3xl font-black text-[#21262E] mb-3 tracking-tight">Add Hints</h1>
+                            <p className="text-sm text-[#656E7B] font-medium">
                                 Choose hints to reveal more about your secret sender
                             </p>
                         </div>
 
-                        {/* Hints Options */}
+                        {/* Зөвлөмж сонголтууд */}
                         <div className="flex justify-center gap-5 mb-10">
                             {availableHints.map((hint) => (
                                 <button
                                     key={hint.id}
                                     onClick={() => toggleHint(hint.id)}
-                                    className={`flex flex-col items-center justify-center w-28 h-28 rounded-[22px] transition-all duration-300 ${
+                                    className={`flex flex-col items-center justify-center w-28 h-28 rounded-xl transition-all duration-300 ${
                                         selectedHints.includes(hint.id)
-                                            ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-2xl scale-110 ring-2 ring-pink-400'
-                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:scale-105 shadow-lg'
+                                            ? 'bg-linear-to-r from-[#FD267A] to-[#FF6036] text-white shadow-lg scale-110'
+                                            : 'bg-[#F0F2F4] text-[#656E7B] hover:bg-[#E8E6EA] shadow-sm'
                                     }`}
                                 >
-                                    <span className="text-4xl mb-2 transform transition-transform group-hover:scale-110">{hint.icon}</span>
+                                    <span className="text-4xl mb-2">{hint.icon}</span>
                                     <span className="text-xs font-bold tracking-wide">{hint.label}</span>
                                 </button>
                             ))}
                         </div>
 
-                        {/* Note */}
-                        <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 mb-8 border border-pink-100">
-                            <p className="text-xs text-gray-600 text-center font-bold tracking-wider">
-                                💎 1 HINT = 50 COINS
+                        {/* Зоос мэдэгдэл */}
+                        <div className="bg-[#F0F2F4] rounded-xl p-4 mb-8 border border-[#E8E6EA]">
+                            <p className="text-xs text-[#656E7B] text-center font-bold tracking-wider">
+                                1 HINT = 50 COINS
                             </p>
                         </div>
 
-                        {/* Continue Button */}
+                        {/* Үргэлжлүүлэх товч */}
                         <button
                             onClick={handleContinue}
                             disabled={selectedHints.length === 0}
-                            className={`w-full py-4 font-bold rounded-2xl transition-all shadow-lg ${
+                            className={`w-full py-4 font-bold rounded-full transition-all shadow-md ${
                                 selectedHints.length > 0
-                                    ? 'bg-gray-900 hover:bg-gray-800 text-white'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    ? 'bg-linear-to-r from-[#FD267A] to-[#FF6036] hover:opacity-90 text-white'
+                                    : 'bg-[#E8E6EA] text-[#656E7B] cursor-not-allowed'
                             }`}
                         >
                             Continue
@@ -259,52 +231,42 @@ export default function DiscoverPage() {
                     </div>
                 )}
 
-                {/* Reveal Screen */}
+                {/* Илчлэх дэлгэц */}
                 {step === 'reveal' && (
-                    <div className="relative h-[650px] bg-gradient-to-br from-pink-100 via-purple-100 to-rose-100 rounded-[32px] overflow-hidden shadow-2xl border-4 border-white animate-fade-in">
-                        {/* Floating Hearts Animation */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="animate-pulse">
-                                <HeartIcon className="w-28 h-28 text-white/30 absolute top-16 left-8 animate-float" />
-                                <HeartIcon className="w-20 h-20 text-white/40 absolute top-28 right-12 animate-float-delayed" />
-                                <HeartIcon className="w-24 h-24 text-white/20 absolute bottom-28 left-16 animate-float" />
-                                <SparklesIcon className="w-16 h-16 text-pink-300/50 absolute top-1/2 right-8 animate-bounce" />
-                            </div>
-                        </div>
-
-                        {/* Main Content */}
+                    <div className="relative h-[650px] bg-white rounded-xl overflow-hidden shadow-lg border border-[#E8E6EA]">
+                        {/* Үндсэн агуулга */}
                         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center p-8">
-                            <div className="mb-10 animate-bounce-slow">
-                                <div className="w-36 h-36 bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-2xl ring-4 ring-white/50">
-                                    <HeartIcon className="w-20 h-20 text-white animate-pulse" />
+                            <div className="mb-10">
+                                <div className="w-36 h-36 bg-linear-to-r from-[#FD267A] to-[#FF6036] rounded-full flex items-center justify-center mx-auto shadow-lg">
+                                    <HeartIcon className="w-20 h-20 text-white" />
                                 </div>
                             </div>
 
-                            <h1 className="text-5xl font-black text-gray-900 mb-3 drop-shadow-lg">
+                            <h1 className="text-5xl font-black text-[#21262E] mb-3">
                                 {currentSender.message}
                             </h1>
-                            <p className="text-6xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-10 drop-shadow-xl">
+                            <p className="text-6xl font-black text-[#FF4458] mb-10">
                                 {currentSender.name}
                             </p>
 
-                            {/* Hints Revealed */}
-                            <div className="bg-white/90 backdrop-blur-xl rounded-[20px] p-5 mb-8 shadow-lg border border-pink-100">
-                                <p className="text-sm font-bold text-gray-700">
-                                    🎁 Hints: {selectedHints.map(h => availableHints.find(hint => hint.id === h)?.label).join(', ')}
+                            {/* Илэрсэн зөвлөмжүүд */}
+                            <div className="bg-[#F0F2F4] rounded-xl p-5 mb-8 shadow-sm border border-[#E8E6EA]">
+                                <p className="text-sm font-bold text-[#21262E]">
+                                    Hints: {selectedHints.map(h => availableHints.find(hint => hint.id === h)?.label).join(', ')}
                                 </p>
                             </div>
 
-                            {/* Action Buttons */}
+                            {/* Үйлдлийн товчууд */}
                             <div className="space-y-4 w-full">
                                 <button
                                     onClick={handleRespond}
-                                    className="w-full py-5 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:via-rose-600 hover:to-purple-700 text-white font-black rounded-2xl transition-all shadow-2xl hover:shadow-pink-500/50 hover:scale-105 active:scale-95 text-lg"
+                                    className="w-full py-5 bg-linear-to-r from-[#FD267A] to-[#FF6036] hover:opacity-90 text-white font-black rounded-full transition-all shadow-md active:scale-95 text-lg"
                                 >
-                                    Send Response 💕
+                                    Send Response
                                 </button>
                                 <button
                                     onClick={nextSender}
-                                    className="w-full py-4 bg-white/90 hover:bg-white text-gray-900 font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                                    className="w-full py-4 bg-white hover:bg-[#F0F2F4] text-[#21262E] font-bold rounded-full transition-all shadow-sm border border-[#E8E6EA] active:scale-95"
                                 >
                                     Next Sender →
                                 </button>
@@ -312,14 +274,6 @@ export default function DiscoverPage() {
                         </div>
                     </div>
                 )}
-            </div>
-
-            {/* Decorative Elements */}
-            <div className="fixed top-10 right-10 opacity-20 pointer-events-none">
-                <SparklesIcon className="w-16 h-16 text-pink-500 animate-pulse" />
-            </div>
-            <div className="fixed bottom-10 left-10 opacity-20 pointer-events-none">
-                <SparklesIcon className="w-20 h-20 text-purple-500 animate-pulse delay-500" />
             </div>
         </div>
     );

@@ -38,79 +38,14 @@ export default function ChatPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://indate.vercel.app/api/v1';
 
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+
     // Socket холболт, бичиж байгаа төлөв
     const { isConnected, typingUsers, startTyping, stopTyping, socket } = useSocketHook({
         conversationId: selectedConversation?.id,
         autoConnect: !!user,
     });
-
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-        if (!e.target.files?.[0]) return;
-
-        const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            // Зураг байршуулах
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/media/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('Upload failed');
-
-            const data = await response.json();
-            const imageUrl = data.data.url;
-
-            // Зургийг зурвас болгон илгээх
-            if (!selectedConversation || !user) return;
-
-            const message: Message = {
-                id: Date.now().toString(),
-                senderId: user.id,
-                senderName: user.firstName,
-                content: imageUrl,
-                createdAt: new Date().toISOString(),
-            };
-
-            // UI шинэчлэх (оптимист)
-            setConversations(conversations.map(conv =>
-                conv.id === selectedConversation.id
-                    ? {
-                        ...conv,
-                        messages: [...conv.messages, message],
-                        lastMessage: 'Sent a photo',
-                        lastMessageAt: new Date().toISOString(),
-                    }
-                    : conv
-            ));
-
-            setSelectedConversation({
-                ...selectedConversation,
-                messages: [...selectedConversation.messages, message],
-            });
-
-            // AI хариу өгөх
-            if (selectedConversation.id === 'conv-ai-1' && !isConnected) {
-                setTimeout(() => simulateAIResponse("Nice photo! 📸"), 1000);
-            }
-
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('Failed to upload image');
-        }
-    };
-
-
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState('');
@@ -281,7 +216,7 @@ export default function ChatPage() {
         socket.on('new_message', handleNewMessage);
 
         return () => {
-            socket.off('new_message', handleNewMessage);
+            socket.off('new_message');
         };
     }, [socket]);
 

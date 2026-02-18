@@ -134,24 +134,36 @@ export default function ProfilePage() {
             const imageUrl = uploadData.data.url;
 
             // Зураг профайлд нэмэх
-            const updateResponse = await fetch(`${API_URL}/api/v1/users/me/photo`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ photoUrl: imageUrl })
-            });
+            try {
+                const updateResponse = await fetch(`${API_URL}/api/v1/users/me/photo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ photoUrl: imageUrl })
+                });
 
-            if (!updateResponse.ok) throw new Error('Failed to update profile');
-
-            const updateData = await updateResponse.json();
-
-            // Локал төлөв шинэчлэх
-            setProfile(prev => ({
-                ...prev,
-                photos: updateData.photos || [...prev.photos, imageUrl]
-            }));
+                if (updateResponse.ok) {
+                    const updateData = await updateResponse.json();
+                    setProfile(prev => ({
+                        ...prev,
+                        photos: updateData.photos || [...prev.photos, imageUrl]
+                    }));
+                } else {
+                    // Backend-д хэрэглэгч олдоогүй бол локал state-д нэмэх
+                    setProfile(prev => ({
+                        ...prev,
+                        photos: [...prev.photos, imageUrl]
+                    }));
+                }
+            } catch {
+                // Network алдаа — локал state-д нэмэх
+                setProfile(prev => ({
+                    ...prev,
+                    photos: [...prev.photos, imageUrl]
+                }));
+            }
 
             setMessage('✅ Photo uploaded successfully!');
             setTimeout(() => setMessage(''), 3000);

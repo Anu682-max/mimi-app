@@ -9,23 +9,21 @@ import { useEffect } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
     useEffect(() => {
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker
-                    .register('/sw.js')
-                    .then((registration) => {
-                        console.log('ServiceWorker registered:', registration.scope);
+        // Service worker бүртгэх — push notification-д шаардлагатай
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+                .register('/sw.js')
+                .then((registration) => {
+                    console.log('ServiceWorker registered:', registration.scope);
 
-                        // Check for updates every hour
-                        setInterval(() => {
-                            registration.update();
-                        }, 1000 * 60 * 60);
-                    })
-                    .catch((error) => {
-                        console.error('ServiceWorker registration failed:', error);
-                    });
-            });
+                    // Цагт нэг удаа шинэчлэлт шалгах
+                    setInterval(() => {
+                        registration.update();
+                    }, 1000 * 60 * 60);
+                })
+                .catch((error) => {
+                    console.error('ServiceWorker registration failed:', error);
+                });
         }
 
         // Handle mobile viewport height

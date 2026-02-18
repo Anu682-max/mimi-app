@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://indate.vercel.app/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3699';
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -74,7 +74,7 @@ export function usePushNotification() {
 
             // Send subscription to backend
             const token = localStorage.getItem('token');
-            const subRes = await fetch(`${API_URL}/notifications/subscribe`, {
+            const subRes = await fetch(`${API_URL}/api/v1/notifications/subscribe`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

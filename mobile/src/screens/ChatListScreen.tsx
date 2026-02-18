@@ -81,7 +81,7 @@ export default function ChatListScreen() {
     if (isLoading) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#EC4899" />
+                <ActivityIndicator size="large" color="#FF4458" />
             </SafeAreaView>
         );
     }
@@ -115,23 +115,23 @@ export default function ChatListScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#FFFFFF',
     },
     loadingContainer: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
     },
     header: {
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#1A1A24',
+        borderBottomColor: '#E8E6EA',
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
     },
     list: {
         padding: 16,
@@ -139,16 +139,16 @@ const styles = StyleSheet.create({
     conversationItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         padding: 16,
-        borderRadius: 16,
-        marginBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E8E6EA',
     },
     avatar: {
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
@@ -164,12 +164,12 @@ const styles = StyleSheet.create({
     conversationName: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#FFF',
+        color: '#21262E',
         marginBottom: 4,
     },
     lastMessage: {
         fontSize: 14,
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     emptyContainer: {
         flex: 1,
@@ -184,12 +184,12 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
         marginBottom: 8,
     },
     emptyText: {
         fontSize: 16,
-        color: '#9CA3AF',
+        color: '#656E7B',
         textAlign: 'center',
     },
 });

@@ -16,6 +16,7 @@ import {
     Platform,
     Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
@@ -114,15 +115,39 @@ export function ChatScreen() {
     const socketMessages = useSocketMessages(conversationId);
     const isRecipientOnline = useOnlineStatus(recipientId);
 
+    /**
+     * Дуу дуудлага эхлүүлэх
+     */
+    const handleVoiceCall = () => {
+        (navigation as any).navigate('Call', {
+            targetUserId: recipientId,
+            targetName: recipientName,
+            targetPhoto: recipientPhoto,
+            callType: 'voice',
+        });
+    };
+
+    /**
+     * Видео дуудлага эхлүүлэх
+     */
+    const handleVideoCall = () => {
+        (navigation as any).navigate('Call', {
+            targetUserId: recipientId,
+            targetName: recipientName,
+            targetPhoto: recipientPhoto,
+            callType: 'video',
+        });
+    };
+
     useEffect(() => {
-        // Set header with recipient info and online status
+        // Header-д хэрэглэгчийн мэдээлэл, онлайн статус, дуудлагын товчлуурууд
         navigation.setOptions({
             headerTitle: () => (
                 <View style={styles.headerTitle}>
                     {recipientPhoto && (
                         <View style={styles.avatarContainer}>
                             <Image source={{ uri: recipientPhoto }} style={styles.headerAvatar} />
-                            {/* Online status indicator */}
+                            {/* Онлайн статусын индикатор */}
                             {isRecipientOnline && (
                                 <View style={styles.onlineIndicator} />
                             )}
@@ -130,19 +155,36 @@ export function ChatScreen() {
                     )}
                     <View>
                         <Text style={styles.headerName}>{recipientName}</Text>
-                        {/* Real-time typing indicator */}
+                        {/* Бичиж байгаа индикатор */}
                         {typingUsers.length > 0 && (
                             <Text style={styles.typingIndicator}>
                                 {t('chat.typing')}
                             </Text>
                         )}
-                        {/* Online/Offline status text */}
+                        {/* Онлайн/Оффлайн статус */}
                         {!typingUsers.length && (
                             <Text style={[styles.statusText, isRecipientOnline && styles.onlineText]}>
                                 {isRecipientOnline ? t('chat.online') : t('chat.offline')}
                             </Text>
                         )}
                     </View>
+                </View>
+            ),
+            // Дуудлагын товчлуурууд (header-ийн баруун тал)
+            headerRight: () => (
+                <View style={styles.headerCallButtons}>
+                    <TouchableOpacity
+                        style={styles.callButton}
+                        onPress={handleVoiceCall}
+                    >
+                        <Ionicons name="call-outline" size={22} color="#FF4458" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.callButton}
+                        onPress={handleVideoCall}
+                    >
+                        <Ionicons name="videocam-outline" size={24} color="#FF4458" />
+                    </TouchableOpacity>
                 </View>
             ),
         });
@@ -439,6 +481,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         color: '#FFFFFF',
+    },
+    // Дуудлагын товчлуурууд (header)
+    headerCallButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        marginRight: 4,
+    },
+    callButton: {
+        padding: 6,
     },
 });
 

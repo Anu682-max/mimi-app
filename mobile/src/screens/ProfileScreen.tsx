@@ -152,7 +152,7 @@ export default function ProfileScreen() {
     if (isLoading) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#EC4899" />
+                <ActivityIndicator size="large" color="#FF4458" />
             </SafeAreaView>
         );
     }
@@ -170,7 +170,7 @@ export default function ProfileScreen() {
 
                 {/* Profile Photo */}
                 <View style={styles.photoSection}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={pickImage}
                         disabled={isUploading}
                         style={styles.photoContainer}
@@ -192,7 +192,7 @@ export default function ProfileScreen() {
                         </View>
                         {isUploading && (
                             <View style={styles.uploadingOverlay}>
-                                <ActivityIndicator size="large" color="#EC4899" />
+                                <ActivityIndicator size="large" color="#FF4458" />
                             </View>
                         )}
                     </TouchableOpacity>
@@ -243,7 +243,7 @@ export default function ProfileScreen() {
                 )}
 
                 {/* Edit Profile Button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => navigation.navigate('EditProfile')}
                 >
@@ -257,11 +257,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
     },
     loadingContainer: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
     },
     settingsIcon: {
         fontSize: 24,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
         width: 150,
         height: 150,
         borderRadius: 75,
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -315,11 +315,11 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
-        borderColor: '#0A0A0F',
+        borderColor: '#F0F2F4',
     },
     cameraIcon: {
         fontSize: 20,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         borderRadius: 75,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -342,27 +342,29 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
         marginRight: 8,
     },
     age: {
         fontSize: 24,
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     infoCard: {
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
     },
     infoLabel: {
         fontSize: 14,
-        color: '#9CA3AF',
+        color: '#656E7B',
         marginBottom: 8,
     },
     infoText: {
         fontSize: 16,
-        color: '#FFF',
+        color: '#21262E',
     },
     interestsContainer: {
         flexDirection: 'row',
@@ -370,17 +372,17 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     interestTag: {
-        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+        backgroundColor: 'rgba(255, 68, 88, 0.1)',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
     },
     interestText: {
-        color: '#EC4899',
+        color: '#FF4458',
         fontSize: 14,
     },
     editButton: {
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',

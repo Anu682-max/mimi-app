@@ -69,12 +69,12 @@ export default function SettingsScreen() {
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={setNotificationsEnabled}
-                            trackColor={{ false: '#374151', true: '#EC4899' }}
+                            trackColor={{ false: '#E8E6EA', true: '#FF4458' }}
                             thumbColor="#FFF"
                         />
                     </View>
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.settingItem}
                         onPress={() => (navigation as any).navigate('NotificationTest')}
                     >
@@ -138,7 +138,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
     },
     scrollContent: {
         padding: 16,
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     backButton: {
-        color: '#9CA3AF',
+        color: '#656E7B',
         fontSize: 16,
         marginBottom: 16,
     },
     title: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
     },
     section: {
         marginBottom: 24,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#6B7280',
+        color: '#656E7B',
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginBottom: 12,
@@ -171,34 +171,38 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         padding: 16,
         borderRadius: 12,
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
     },
     settingText: {
         fontSize: 16,
-        color: '#FFF',
+        color: '#21262E',
     },
     settingValue: {
         fontSize: 16,
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     settingArrow: {
         fontSize: 20,
-        color: '#6B7280',
+        color: '#E8E6EA',
     },
     logoutButton: {
-        backgroundColor: '#1A1A24',
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
         marginTop: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(239, 68, 68, 0.2)',
     },
     logoutText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#EC4899',
+        color: '#EF4444',
     },
     modalOverlay: {
         position: 'absolute',
@@ -206,11 +210,11 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
@@ -224,33 +228,36 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
     },
     modalClose: {
         fontSize: 24,
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     languageItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#374151',
+        backgroundColor: '#F0F2F4',
         padding: 16,
         borderRadius: 12,
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
     },
     languageItemActive: {
-        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+        backgroundColor: 'rgba(255, 68, 88, 0.1)',
+        borderColor: '#FF4458',
     },
     languageText: {
         fontSize: 16,
-        color: '#FFF',
+        color: '#21262E',
     },
     languageTextActive: {
-        color: '#EC4899',
+        color: '#FF4458',
     },
     checkmark: {
         fontSize: 16,
-        color: '#EC4899',
+        color: '#FF4458',
     },
 });

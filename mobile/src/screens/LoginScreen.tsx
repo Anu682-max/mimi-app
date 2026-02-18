@@ -70,7 +70,7 @@ export default function LoginScreen() {
                                 value={email}
                                 onChangeText={setEmail}
                                 placeholder={t('auth.email')}
-                                placeholderTextColor="#6B7280"
+                                placeholderTextColor="#656E7B"
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 autoCorrect={false}
@@ -84,7 +84,7 @@ export default function LoginScreen() {
                                 value={password}
                                 onChangeText={setPassword}
                                 placeholder={t('auth.password')}
-                                placeholderTextColor="#6B7280"
+                                placeholderTextColor="#656E7B"
                                 secureTextEntry
                             />
                         </View>
@@ -128,7 +128,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#FFFFFF',
     },
     keyboardView: {
         flex: 1,
@@ -141,18 +141,18 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 48,
         fontWeight: 'bold',
-        color: '#EC4899',
+        color: '#FF4458',
         textAlign: 'center',
         marginBottom: 8,
     },
     tagline: {
         fontSize: 18,
-        color: '#9CA3AF',
+        color: '#656E7B',
         textAlign: 'center',
         marginBottom: 48,
     },
     errorContainer: {
-        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         borderWidth: 1,
         borderColor: '#EF4444',
         borderRadius: 12,
@@ -170,17 +170,17 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     label: {
-        color: '#9CA3AF',
+        color: '#656E7B',
         fontSize: 14,
         marginBottom: 8,
     },
     input: {
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#F0F2F4',
         borderWidth: 1,
-        borderColor: '#374151',
+        borderColor: '#E8E6EA',
         borderRadius: 12,
         padding: 16,
-        color: '#FFF',
+        color: '#21262E',
         fontSize: 16,
     },
     forgotPassword: {
@@ -188,11 +188,11 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     forgotPasswordText: {
-        color: '#EC4899',
+        color: '#FF4458',
         fontSize: 14,
     },
     loginButton: {
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         borderRadius: 12,
         padding: 18,
         alignItems: 'center',
@@ -210,10 +210,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     signupText: {
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     signupLink: {
-        color: '#EC4899',
+        color: '#FF4458',
         fontWeight: '600',
     },
 });

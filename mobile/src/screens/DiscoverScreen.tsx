@@ -159,7 +159,7 @@ export default function DiscoverScreen() {
     if (isLoading) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#EC4899" />
+                <ActivityIndicator size="large" color="#FF4458" />
             </SafeAreaView>
         );
     }
@@ -307,11 +307,11 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
     },
     loadingContainer: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#EC4899',
+        color: '#FF4458',
     },
     settingsIcon: {
         fontSize: 24,
@@ -339,9 +339,14 @@ const styles = StyleSheet.create({
     card: {
         width: width - 32,
         height: height * 0.65,
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         borderRadius: 20,
         overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
     },
     likeLabel: {
         position: 'absolute',
@@ -379,7 +384,7 @@ const styles = StyleSheet.create({
     },
     photoContainer: {
         flex: 1,
-        backgroundColor: '#374151',
+        backgroundColor: '#E8E6EA',
     },
     photo: {
         width: '100%',
@@ -405,26 +410,26 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
         marginRight: 8,
     },
     age: {
         fontSize: 20,
-        color: '#9CA3AF',
+        color: '#656E7B',
     },
     occupation: {
         fontSize: 14,
-        color: '#9CA3AF',
+        color: '#656E7B',
         marginBottom: 4,
     },
     location: {
         fontSize: 14,
-        color: '#9CA3AF',
+        color: '#656E7B',
         marginBottom: 8,
     },
     bio: {
         fontSize: 14,
-        color: '#D1D5DB',
+        color: '#656E7B',
     },
     buttons: {
         flexDirection: 'row',
@@ -435,24 +440,34 @@ const styles = StyleSheet.create({
     passButton: {
         width: 64,
         height: 64,
-        backgroundColor: '#374151',
+        backgroundColor: '#FFFFFF',
         borderRadius: 32,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#6B7280',
+        borderColor: '#E8E6EA',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
     },
     passButtonText: {
         fontSize: 28,
-        color: '#FFF',
+        color: '#656E7B',
     },
     likeButton: {
         width: 64,
         height: 64,
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         borderRadius: 32,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#FF4458',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
     },
     likeButtonText: {
         fontSize: 28,
@@ -467,16 +482,16 @@ const styles = StyleSheet.create({
     noUsersTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
         marginBottom: 8,
     },
     noUsersText: {
         fontSize: 16,
-        color: '#9CA3AF',
+        color: '#656E7B',
         marginBottom: 24,
     },
     refreshButton: {
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -487,13 +502,21 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     matchModal: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 24,
         alignItems: 'center',
-        padding: 24,
+        padding: 32,
+        marginHorizontal: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 8,
     },
     matchEmoji: {
         fontSize: 64,
@@ -502,19 +525,19 @@ const styles = StyleSheet.create({
     matchTitle: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#EC4899',
+        color: '#FF4458',
         marginBottom: 8,
     },
     matchText: {
         fontSize: 16,
-        color: '#9CA3AF',
+        color: '#656E7B',
         marginBottom: 32,
     },
     matchButtons: {
         gap: 16,
     },
     messageButton: {
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         paddingHorizontal: 32,
         paddingVertical: 16,
         borderRadius: 12,
@@ -523,18 +546,20 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontWeight: 'bold',
         fontSize: 16,
+        textAlign: 'center',
     },
     keepSwipingButton: {
-        backgroundColor: '#374151',
+        backgroundColor: '#FFFFFF',
         paddingHorizontal: 32,
         paddingVertical: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#6B7280',
+        borderColor: '#E8E6EA',
     },
     keepSwipingText: {
-        color: '#FFF',
+        color: '#21262E',
         fontWeight: 'bold',
         fontSize: 16,
+        textAlign: 'center',
     },
 });

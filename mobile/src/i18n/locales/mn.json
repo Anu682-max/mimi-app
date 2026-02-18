@@ -1,0 +1,61 @@
+{
+    "common": {
+        "ok": "За",
+        "cancel": "Цуцлах",
+        "save": "Хадгалах",
+        "back": "Буцах",
+        "next": "Дараах",
+        "loading": "Ачааллаж байна..."
+    },
+    "auth": {
+        "login_title": "Нэвтрэх",
+        "signup_title": "Бүртгэл үүсгэх",
+        "email": "Имэйл",
+        "password": "Нууц үг",
+        "login_button": "Нэвтрэх",
+        "signup_button": "Бүртгүүлэх",
+        "forgot_password": "Нууц үгээ мартсан уу?",
+        "dont_have_account": "Бүртгэлгүй юу?"
+    },
+    "profile": {
+        "title": "Профайл",
+        "edit_profile": "Профайл засах"
+    },
+    "onboarding": {
+        "tagline": "AI-аар төгс хосоо олоорой"
+    },
+    "discover": {
+        "title": "Олох",
+        "no_more_profiles": "Ойролцоо профайл алга"
+    },
+    "matching": {
+        "its_a_match": "Тохирсон!",
+        "send_message": "Мессеж илгээх",
+        "keep_swiping": "Үргэлжлүүлэх"
+    },
+    "chat": {
+        "title": "Мессежүүд",
+        "type_message": "Мессеж бичнэ үү...",
+        "translate": "Орчуулах",
+        "show_original": "Эх хувилбар",
+        "send": "Илгээх",
+        "typing": "бичиж байна...",
+        "is_typing": "бичиж байна...",
+        "online": "Онлайн",
+        "offline": "Оффлайн",
+        "offline_mode": "⚠️ Оффлайн горим - Холбогдсоны дараа мессеж илгээгдэнэ",
+        "no_messages": "Одоогоор мессеж алга",
+        "start_conversation": "Яриа эхлүүлээрэй!",
+        "show_translation": "Орчуулга",
+        "translated_from": "{{language}} хэлнээс орчуулсан"
+    },
+    "settings": {
+        "title": "Тохиргоо",
+        "account": "Бүртгэл",
+        "language": "Хэл",
+        "change_language": "Хэл солих",
+        "notifications": "Мэдэгдэл",
+        "privacy": "Нууцлал",
+        "logout": "Гарах"
+    }
+}

@@ -5,16 +5,18 @@ import * as Localization from 'expo-localization';
 import en from './locales/en.json';
 import ja from './locales/ja.json';
 import ko from './locales/ko.json';
+import mn from './locales/mn.json';
 
 const resources = {
     en: { translation: en },
     ja: { translation: ja },
     ko: { translation: ko },
+    mn: { translation: mn },
 };
 
-// Get device locale
+// Төхөөрөмжийн хэлийг тодорхойлох
 const deviceLocale = Localization.locale.split('-')[0];
-const defaultLocale = ['en', 'ja', 'ko'].includes(deviceLocale) ? deviceLocale : 'en';
+const defaultLocale = ['en', 'ja', 'ko', 'mn'].includes(deviceLocale) ? deviceLocale : 'en';
 
 i18n
     .use(initReactI18next)

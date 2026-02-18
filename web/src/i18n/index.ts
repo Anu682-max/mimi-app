@@ -26,19 +26,30 @@ const resources = {
     mn: { translation: mn },
 };
 
-i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-        resources,
-        fallbackLng: 'en',
-        interpolation: {
-            escapeValue: false,
-        },
-        detection: {
-            order: ['localStorage', 'navigator'],
-            caches: ['localStorage'],
-        },
-    });
+// SSR дээр LanguageDetector ажиллахгүй тул зөвхөн клиент дээр ашиглана
+const isServer = typeof window === 'undefined';
+
+const i18nInstance = i18n.use(initReactI18next);
+
+if (!isServer) {
+    i18nInstance.use(LanguageDetector);
+}
+
+i18nInstance.init({
+    resources,
+    fallbackLng: 'en',
+    // SSR hydration mismatch-аас зайлсхийхийн тулд lng тохируулна
+    lng: isServer ? 'en' : undefined,
+    interpolation: {
+        escapeValue: false,
+    },
+    detection: {
+        order: ['localStorage', 'navigator'],
+        caches: ['localStorage'],
+    },
+    react: {
+        useSuspense: false,
+    },
+});
 
 export default i18n;

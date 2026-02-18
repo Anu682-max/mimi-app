@@ -124,7 +124,7 @@ export default function ChatScreen() {
         return (
             <View style={[styles.messageRow, isOwn && styles.messageRowOwn]}>
                 <View style={[styles.messageBubble, isOwn ? styles.bubbleOwn : styles.bubbleOther]}>
-                    <Text style={styles.messageText}>
+                    <Text style={[styles.messageText, isOwn ? styles.messageTextOwn : styles.messageTextOther]}>
                         {showTranslation ? item.translatedContent : item.content}
                     </Text>
                 </View>
@@ -173,7 +173,7 @@ export default function ChatScreen() {
                         value={newMessage}
                         onChangeText={setNewMessage}
                         placeholder={t('chat.type_message')}
-                        placeholderTextColor="#6B7280"
+                        placeholderTextColor="#656E7B"
                         multiline
                     />
                     <TouchableOpacity
@@ -192,25 +192,26 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0F',
+        backgroundColor: '#F0F2F4',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
+        backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
-        borderBottomColor: '#1A1A24',
+        borderBottomColor: '#E8E6EA',
     },
     backButton: {
         fontSize: 24,
-        color: '#9CA3AF',
+        color: '#21262E',
         marginRight: 16,
     },
     headerTitle: {
         flex: 1,
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#21262E',
     },
     headerRight: {
         width: 40,
@@ -231,38 +232,48 @@ const styles = StyleSheet.create({
         borderRadius: 16,
     },
     bubbleOwn: {
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         borderBottomRightRadius: 4,
     },
     bubbleOther: {
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
         borderBottomLeftRadius: 4,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
     },
     messageText: {
-        color: '#FFF',
         fontSize: 16,
+    },
+    messageTextOwn: {
+        color: '#FFFFFF',
+    },
+    messageTextOther: {
+        color: '#21262E',
     },
     translateButton: {
         marginTop: 4,
     },
     translateText: {
         fontSize: 12,
-        color: '#6B7280',
+        color: '#FF4458',
     },
     inputContainer: {
         flexDirection: 'row',
         padding: 16,
+        backgroundColor: '#FFFFFF',
         borderTopWidth: 1,
-        borderTopColor: '#1A1A24',
+        borderTopColor: '#E8E6EA',
         alignItems: 'flex-end',
     },
     input: {
         flex: 1,
-        backgroundColor: '#1A1A24',
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
         borderRadius: 20,
         paddingHorizontal: 16,
         paddingVertical: 12,
-        color: '#FFF',
+        color: '#21262E',
         fontSize: 16,
         maxHeight: 100,
         marginRight: 12,
@@ -270,7 +281,7 @@ const styles = StyleSheet.create({
     sendButton: {
         width: 44,
         height: 44,
-        backgroundColor: '#EC4899',
+        backgroundColor: '#FF4458',
         borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',

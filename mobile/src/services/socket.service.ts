@@ -4,8 +4,10 @@
  */
 
 import { io, Socket } from 'socket.io-client';
+import { API_URL } from '../config';
 
-const SOCKET_URL = 'http://localhost:3699'; // Change to your backend URL
+// Config-оос API URL авна
+const SOCKET_URL = API_URL;
 
 interface TypingData {
   userId: string;

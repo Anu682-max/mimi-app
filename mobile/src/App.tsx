@@ -1,117 +1,130 @@
 /**
- * mimi Mobile App Entry Point
+ * mimi Mobile App — Үндсэн навигацийн бүтэц
+ * Tinder загварын дизайн
  */
 
 import React, { useEffect, useState } from 'react';
-import { StatusBar, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { StatusBar, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { I18nextProvider } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import i18n, { initializeI18n } from './i18n';
-import { AuthProvider, useAuth } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-// Screens
-import { LoginScreen } from './screens/auth/LoginScreen';
-import { SettingsScreen } from './screens/settings/SettingsScreen';
-import { ChatScreen } from './screens/chat/ChatScreen';
+// Бодит дэлгэцүүд
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import DiscoverScreen from './screens/DiscoverScreen';
+import MatchesScreen from './screens/MatchesScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import ChatScreen from './screens/ChatScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import CallScreen from './screens/CallScreen';
+import IncomingCallModal from './components/IncomingCallModal';
 
-// Placeholder screens
-const DiscoverScreen = () => (
-    <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>Discover</Text>
-    </View>
-);
-
-const MatchesScreen = () => (
-    <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>Matches</Text>
-    </View>
-);
-
-const MessagesScreen = () => (
-    <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>Messages</Text>
-    </View>
-);
-
-const ProfileScreen = () => (
-    <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>Profile</Text>
-    </View>
-);
-
-// Navigation stacks
+// Навигацийн стек, таб
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Auth Stack (Login, Signup, etc.)
+// Нэвтрэлтийн стек (Login, Signup)
 function AuthStack() {
     return (
         <Stack.Navigator
             screenOptions={{
                 headerShown: false,
-                contentStyle: { backgroundColor: '#0A0A0F' },
+                contentStyle: { backgroundColor: '#FFFFFF' },
             }}
         >
             <Stack.Screen name="Login" component={LoginScreen} />
-            {/* Add SignUp, ForgotPassword screens here */}
+            <Stack.Screen name="Signup" component={SignupScreen} />
         </Stack.Navigator>
     );
 }
 
-// Main Tab Navigator
+// Үндсэн таб навигатор
 function MainTabs() {
     return (
         <Tab.Navigator
-            screenOptions={{
+            screenOptions={({ route }) => ({
                 tabBarStyle: {
-                    backgroundColor: '#1A1A24',
-                    borderTopColor: '#2A2A3A',
+                    backgroundColor: '#FFFFFF',
+                    borderTopColor: '#E8E6EA',
+                    borderTopWidth: 1,
+                    height: 60,
+                    paddingBottom: 8,
+                    paddingTop: 4,
                 },
-                tabBarActiveTintColor: '#FF4D6A',
-                tabBarInactiveTintColor: '#666',
+                tabBarActiveTintColor: '#FF4458',
+                tabBarInactiveTintColor: '#656E7B',
                 headerStyle: {
-                    backgroundColor: '#0A0A0F',
+                    backgroundColor: '#FFFFFF',
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#E8E6EA',
                 },
-                headerTintColor: '#FFFFFF',
-            }}
+                headerTintColor: '#21262E',
+                headerTitleStyle: {
+                    fontWeight: '700',
+                    fontSize: 18,
+                },
+                // Таб icon-ууд
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName: keyof typeof Ionicons.glyphMap = 'heart';
+                    if (route.name === 'Discover') {
+                        iconName = focused ? 'compass' : 'compass-outline';
+                    } else if (route.name === 'Matches') {
+                        iconName = focused ? 'heart' : 'heart-outline';
+                    } else if (route.name === 'Messages') {
+                        iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+                    } else if (route.name === 'Profile') {
+                        iconName = focused ? 'person' : 'person-outline';
+                    }
+                    return <Ionicons name={iconName} size={size} color={color} />;
+                },
+            })}
         >
             <Tab.Screen
                 name="Discover"
                 component={DiscoverScreen}
-                options={{ tabBarLabel: 'Discover' }}
+                options={{ title: 'Discover' }}
             />
             <Tab.Screen
                 name="Matches"
                 component={MatchesScreen}
-                options={{ tabBarLabel: 'Matches' }}
+                options={{ title: 'Matches' }}
             />
             <Tab.Screen
                 name="Messages"
-                component={MessagesScreen}
-                options={{ tabBarLabel: 'Messages' }}
+                component={ChatListScreen}
+                options={{ title: 'Messages' }}
             />
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
-                options={{ tabBarLabel: 'Profile' }}
+                options={{ title: 'Profile' }}
             />
         </Tab.Navigator>
     );
 }
 
-// App Stack (includes modals and other screens)
+// App стек (модал дэлгэцүүд орно)
 function AppStack() {
     return (
         <Stack.Navigator
             screenOptions={{
                 headerStyle: {
-                    backgroundColor: '#0A0A0F',
+                    backgroundColor: '#FFFFFF',
                 },
-                headerTintColor: '#FFFFFF',
-                contentStyle: { backgroundColor: '#0A0A0F' },
+                headerTintColor: '#21262E',
+                headerTitleStyle: {
+                    fontWeight: '700',
+                },
+                contentStyle: { backgroundColor: '#F0F2F4' },
             }}
         >
             <Stack.Screen
@@ -129,18 +142,27 @@ function AppStack() {
                 component={ChatScreen}
                 options={{ title: '' }}
             />
+            <Stack.Screen
+                name="Call"
+                component={CallScreen}
+                options={{
+                    headerShown: false,
+                    presentation: 'fullScreenModal',
+                    contentStyle: { backgroundColor: '#111111' },
+                }}
+            />
         </Stack.Navigator>
     );
 }
 
-// Navigation container with auth state
+// Навигацийн контейнер — нэвтрэлтийн төлөв шалгах
 function AppNavigator() {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
         return (
             <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#FF4D6A" />
+                <ActivityIndicator size="large" color="#FF4458" />
             </View>
         );
     }
@@ -148,28 +170,35 @@ function AppNavigator() {
     return (
         <NavigationContainer
             theme={{
-                dark: true,
+                dark: false,
                 colors: {
-                    primary: '#FF4D6A',
-                    background: '#0A0A0F',
-                    card: '#1A1A24',
-                    text: '#FFFFFF',
-                    border: '#2A2A3A',
-                    notification: '#FF4D6A',
+                    primary: '#FF4458',
+                    background: '#F0F2F4',
+                    card: '#FFFFFF',
+                    text: '#21262E',
+                    border: '#E8E6EA',
+                    notification: '#FF4458',
+                },
+                fonts: {
+                    regular: { fontFamily: 'System', fontWeight: '400' },
+                    medium: { fontFamily: 'System', fontWeight: '500' },
+                    bold: { fontFamily: 'System', fontWeight: '700' },
+                    heavy: { fontFamily: 'System', fontWeight: '900' },
                 },
             }}
         >
             {isAuthenticated ? <AppStack /> : <AuthStack />}
+            {/* Ирж буй дуудлагын глобал модал */}
+            {isAuthenticated && <IncomingCallModal />}
         </NavigationContainer>
     );
 }
 
-// Root App Component
+// Үндсэн App компонент
 export default function App() {
     const [isI18nReady, setI18nReady] = useState(false);
 
     useEffect(() => {
-        // Initialize i18n on app start
         initializeI18n().then(() => {
             setI18nReady(true);
         });
@@ -178,7 +207,7 @@ export default function App() {
     if (!isI18nReady) {
         return (
             <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#FF4D6A" />
+                <ActivityIndicator size="large" color="#FF4458" />
             </View>
         );
     }
@@ -186,7 +215,7 @@ export default function App() {
     return (
         <I18nextProvider i18n={i18n}>
             <AuthProvider>
-                <StatusBar barStyle="light-content" backgroundColor="#0A0A0F" />
+                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
                 <AppNavigator />
             </AuthProvider>
         </I18nextProvider>
@@ -198,17 +227,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#0A0A0F',
-    },
-    placeholder: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#0A0A0F',
-    },
-    placeholderText: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#FFFFFF',
+        backgroundColor: '#FFFFFF',
     },
 });
